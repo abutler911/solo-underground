@@ -1,7 +1,7 @@
 // client/src/components/MainFeed.js
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+
 import ArticleCard from "./ArticleCard";
 import api from "../utils/api";
 

@@ -473,7 +473,7 @@ const ArticleEditor = () => {
 
   const [saving, setSaving] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
+  // const [previewMode, setPreviewMode] = useState(false);
 
   const categories = [
     "Music",
