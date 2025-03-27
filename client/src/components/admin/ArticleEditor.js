@@ -164,6 +164,34 @@ const Input = styled.input`
   }
 `;
 
+const Select = styled.select`
+  width: 100%;
+  padding: 0.9rem 1rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem top 50%;
+  background-size: 0.65rem auto;
+
+  &:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
+  }
+
+  option {
+    background-color: #1a1a1a;
+    color: white;
+  }
+`;
+
 const TextArea = styled.textarea`
   width: 100%;
   padding: 0.9rem 1rem;
@@ -256,6 +284,11 @@ const CustomQuill = styled.div`
         blockquote {
           border-left-color: rgba(255, 255, 255, 0.2);
           color: rgba(255, 255, 255, 0.7);
+        }
+
+        a {
+          color: #4e95cb;
+          text-decoration: none;
         }
       }
     }
@@ -412,6 +445,79 @@ const EditorSection = styled.div`
   }
 `;
 
+// New Citation components
+const CitationsContainer = styled.div`
+  margin-top: 1.5rem;
+`;
+
+const CitationItem = styled.div`
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+`;
+
+const CitationInputs = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+const CitationControls = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const RemoveButton = styled.button`
+  background: rgba(220, 53, 69, 0.1);
+  border: none;
+  color: rgba(255, 150, 150, 0.9);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(220, 53, 69, 0.2);
+  }
+`;
+
+const AddCitationButton = styled.button`
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.75rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
 const LoadingOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -456,6 +562,11 @@ const LoadingText = styled.div`
   text-align: center;
 `;
 
+// Format helper function for inserting links in the editor
+const formatLink = (url, text) => {
+  return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+};
+
 const ArticleEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -469,16 +580,19 @@ const ArticleEditor = () => {
     coverImage: "",
     photoCredit: "",
     tags: "",
+    author: "", // New author field
   });
+
+  // Array of citation objects
+  const [citations, setCitations] = useState([{ title: "", url: "" }]);
 
   const [saving, setSaving] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
-  // const [previewMode, setPreviewMode] = useState(false);
 
   const categories = [
-    "Music",
-    "Culture",
-    "Art & Design",
+    "Politics",
+    "Finance",
+    "Editorial",
     "Technology",
     "Lifestyle",
   ];
@@ -489,10 +603,21 @@ const ArticleEditor = () => {
         try {
           const res = await api.get(`/api/admin/articles/${id}`);
 
+          // Extract any existing citations from the article data
+          let loadedCitations = [];
+          if (res.data.citations && Array.isArray(res.data.citations)) {
+            loadedCitations = res.data.citations;
+          } else {
+            loadedCitations = [{ title: "", url: "" }];
+          }
+
           setFormData({
             ...res.data,
             tags: res.data.tags ? res.data.tags.join(", ") : "",
+            author: res.data.author || "",
           });
+
+          setCitations(loadedCitations);
         } catch (err) {
           console.error("Error fetching article", err);
         }
@@ -512,6 +637,44 @@ const ArticleEditor = () => {
 
   const handleContentChange = (content) => {
     setFormData({ ...formData, content });
+  };
+
+  // Handle citation changes
+  const handleCitationChange = (index, field, value) => {
+    const updatedCitations = [...citations];
+    updatedCitations[index][field] = value;
+    setCitations(updatedCitations);
+  };
+
+  // Add a new citation
+  const addCitation = () => {
+    setCitations([...citations, { title: "", url: "" }]);
+  };
+
+  // Remove a citation
+  const removeCitation = (index) => {
+    if (citations.length > 1) {
+      const updatedCitations = citations.filter((_, i) => i !== index);
+      setCitations(updatedCitations);
+    }
+  };
+
+  // Insert a citation link into the editor
+  const insertCitationLink = (index) => {
+    const citation = citations[index];
+    if (!citation.title || !citation.url) return;
+
+    // Create a formatted link
+    const link = formatLink(citation.url, citation.title);
+
+    // Get the current content
+    const currentContent = formData.content;
+
+    // Append the link to the end, or you could implement more complex insertion logic
+    const updatedContent = currentContent + `<p>${link}</p>`;
+
+    // Update the content
+    setFormData({ ...formData, content: updatedContent });
   };
 
   const handleImageUpload = async (e) => {
@@ -552,6 +715,11 @@ const ArticleEditor = () => {
     setSaving(true);
 
     try {
+      // Validate citations - remove empty ones
+      const validCitations = citations.filter(
+        (citation) => citation.title.trim() !== "" && citation.url.trim() !== ""
+      );
+
       // Prepare the article data
       const tagsArray = formData.tags
         ? formData.tags
@@ -583,6 +751,8 @@ const ArticleEditor = () => {
         photoCredit: formData.photoCredit || "",
         tags: tagsArray,
         published: publish,
+        author: formData.author || "Admin", // Use the author field or default to Admin
+        citations: validCitations, // Add citations to the article data
       };
 
       console.log("Submitting article data:", articleData);
@@ -691,11 +861,22 @@ const ArticleEditor = () => {
             />
           </FormGroup>
 
+          {/* New Author field */}
+          <FormGroup>
+            <Label>Author</Label>
+            <Input
+              type="text"
+              name="author"
+              value={formData.author}
+              onChange={handleChange}
+              placeholder="Enter author name"
+            />
+          </FormGroup>
+
           <FormRow>
             <FormGroup>
               <Label>Category</Label>
-              <Input
-                as="select"
+              <Select
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
@@ -706,7 +887,7 @@ const ArticleEditor = () => {
                     {category}
                   </option>
                 ))}
-              </Input>
+              </Select>
             </FormGroup>
 
             <FormGroup>
@@ -716,7 +897,7 @@ const ArticleEditor = () => {
                 name="tags"
                 value={formData.tags}
                 onChange={handleChange}
-                placeholder="e.g. indie, music, interview"
+                placeholder="e.g. politics, government, election"
               />
               <InputNote>
                 Add relevant keywords to help readers discover your article
@@ -755,6 +936,68 @@ const ArticleEditor = () => {
               />
             </CustomQuill>
           </FormGroup>
+        </EditorSection>
+
+        <EditorSection>
+          <h2>Citations</h2>
+          <CitationsContainer>
+            {citations.map((citation, index) => (
+              <CitationItem key={index}>
+                <CitationInputs>
+                  <Input
+                    type="text"
+                    placeholder="Citation title or description"
+                    value={citation.title}
+                    onChange={(e) =>
+                      handleCitationChange(index, "title", e.target.value)
+                    }
+                  />
+                  <Input
+                    type="url"
+                    placeholder="URL (e.g., https://example.com)"
+                    value={citation.url}
+                    onChange={(e) =>
+                      handleCitationChange(index, "url", e.target.value)
+                    }
+                  />
+                </CitationInputs>
+                <CitationControls>
+                  <Button
+                    className="secondary"
+                    onClick={() => insertCitationLink(index)}
+                    style={{ padding: "0.5rem", minWidth: "6rem" }}
+                    disabled={!citation.title || !citation.url}
+                  >
+                    Insert
+                  </Button>
+                  <RemoveButton onClick={() => removeCitation(index)}>
+                    ×
+                  </RemoveButton>
+                </CitationControls>
+              </CitationItem>
+            ))}
+            <AddCitationButton onClick={addCitation}>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 5V19M5 12H19"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Add Citation
+            </AddCitationButton>
+            <InputNote>
+              Add citations with working URLs that will be linked in the
+              article. Click "Insert" to add a citation link to the editor at
+              the current cursor position.
+            </InputNote>
+          </CitationsContainer>
         </EditorSection>
 
         <EditorSection>

@@ -4,135 +4,194 @@ import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import api from "../utils/api";
 
-// Removed BackButton and Header-related components since they're now in Layout
+// Global style for importing fonts - add this to index.html instead
+// <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
 
 const ArticleWrapper = styled.article`
-  max-width: 850px;
+  max-width: 740px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 1.5rem 4rem;
+  font-family: "Libre Baskerville", Georgia, serif;
 `;
 
-const ArticleHeader = styled.div`
-  padding: 3rem 0 1.5rem;
-`;
-
-const Category = styled.div`
-  font-size: 0.9rem;
-  color: #d0d0d0;
-  margin-bottom: 1rem;
+const ArticleCategory = styled.div`
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  font-weight: 600;
+  letter-spacing: 0.05rem;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+  color: #d72c2c; /* Atlantic-style red for category */
+  font-weight: 700;
 `;
 
-const Title = styled.h1`
-  font-size: 2.75rem;
-  margin-bottom: 1.5rem;
+const ArticleTitle = styled.h1`
+  font-size: 2.6rem;
   line-height: 1.2;
   font-weight: 700;
-  letter-spacing: -0.5px;
+  margin: 0 0 1.25rem;
+  letter-spacing: -0.01rem;
+  color: #ffffff;
+
+  @media (min-width: 768px) {
+    font-size: 3.2rem;
+  }
 `;
 
-const Meta = styled.div`
-  display: flex;
-  justify-content: space-between;
-  color: #888;
-  font-size: 0.85rem;
-  margin-bottom: 2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 1.5rem;
+const ArticleSubtitle = styled.div`
+  font-family: "Libre Baskerville", Georgia, serif;
+  font-size: 1rem; /* Reduced from 1.25rem */
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  border-left: 3px solid rgba(255, 255, 255, 0.2);
+  padding-left: 1rem;
+`;
+
+const ArticleByline = styled.div`
+  font-family: "Source Sans Pro", sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 1.5rem 0;
+  color: rgba(255, 255, 255, 0.8);
 `;
 
 const CoverImageContainer = styled.div`
+  margin: 2rem 0 1.5rem;
   width: 100%;
-  margin: 0 -1.5rem 2rem;
-  overflow: hidden;
   position: relative;
-
-  @media (min-width: 768px) {
-    height: 60vh;
-    margin: 0 0 3rem;
-  }
 `;
 
 const CoverImage = styled.img`
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
+  height: auto;
+  display: block;
+`;
+
+const ImageCaption = styled.div`
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin-top: 0.5rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: left;
+`;
+
+const ArticleMeta = styled.div`
+  font-family: "Source Sans Pro", sans-serif;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 2rem 0;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+`;
+
+const ArticleDate = styled.div`
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+`;
+
+const ShareTools = styled.div`
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+`;
+
+const ShareButton = styled.button`
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: "Source Sans Pro", sans-serif;
+  letter-spacing: 0.05rem;
+  text-transform: uppercase;
+  padding: 0;
+
+  &:hover {
+    color: #ffffff;
+  }
 `;
 
 const Content = styled.div`
-  padding: 0 0 4rem;
-  line-height: 1.9;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.8;
 
   p {
-    margin-bottom: 2rem;
+    margin-bottom: 1.75rem;
+  }
+
+  p:first-of-type:first-letter {
+    float: left;
+    font-size: 3.5rem;
+    line-height: 1;
+    padding-right: 0.8rem;
+    padding-top: 0.4rem;
   }
 
   h2,
   h3 {
-    margin: 3rem 0 1.5rem;
-    line-height: 1.3;
+    font-family: "Source Sans Pro", sans-serif;
+    font-weight: 700;
+    margin: 2.5rem 0 1.25rem;
   }
 
   h2 {
-    font-size: 1.9rem;
+    font-size: 1.6rem;
   }
 
   h3 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+  }
+
+  blockquote {
+    margin: 2rem 0;
+    padding: 0.5rem 0 0.5rem 1.5rem;
+    border-left: 3px solid rgba(255, 255, 255, 0.4);
+    font-style: italic;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  a {
+    color: #4e95cb;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(78, 149, 203, 0.3);
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-bottom-color: #4e95cb;
+    }
+  }
+
+  strong {
+    font-weight: 700;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  ul,
+  ol {
+    margin: 0 0 1.75rem 1.5rem;
+
+    li {
+      margin-bottom: 0.75rem;
+    }
   }
 
   img {
     max-width: 100%;
     height: auto;
     margin: 2rem 0;
-    border-radius: 4px;
   }
-
-  blockquote {
-    margin: 2rem 0;
-    padding: 1.5rem 2rem;
-    border-left: 4px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 0 4px 4px 0;
-    font-style: italic;
-    color: #c0c0c0;
-  }
-
-  a {
-    color: #a0a0ff;
-    text-decoration: none;
-    border-bottom: 1px dotted rgba(160, 160, 255, 0.5);
-    transition: all 0.2s ease;
-
-    &:hover {
-      color: #c0c0ff;
-      border-bottom: 1px solid rgba(192, 192, 255, 0.8);
-    }
-  }
-
-  ul,
-  ol {
-    margin-bottom: 2rem;
-    padding-left: 2rem;
-
-    li {
-      margin-bottom: 0.75rem;
-    }
-  }
-`;
-
-const PhotoCredit = styled.div`
-  text-align: right;
-  font-size: 0.8rem;
-  color: #888;
-  margin-top: -1.5rem;
-  margin-bottom: 2rem;
-  font-style: italic;
 `;
 
 const TagsContainer = styled.div`
@@ -140,20 +199,58 @@ const TagsContainer = styled.div`
   flex-wrap: wrap;
   gap: 0.75rem;
   margin: 3rem 0 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  font-family: "Source Sans Pro", sans-serif;
 `;
 
 const Tag = styled.span`
-  background: rgba(255, 255, 255, 0.08);
-  padding: 0.5rem 1rem;
-  border-radius: 2rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.25rem;
   font-size: 0.8rem;
-  font-weight: 500;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
   transition: all 0.2s ease;
+  cursor: pointer;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.15);
+  }
+`;
+
+// New component for citations
+const CitationsContainer = styled.div`
+  margin: 3rem 0 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  font-family: "Source Sans Pro", sans-serif;
+`;
+
+const CitationsTitle = styled.h3`
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+`;
+
+const CitationsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+const CitationItem = styled.a`
+  text-decoration: none;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.25rem;
+  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
   }
 `;
 
@@ -164,6 +261,7 @@ const Loading = styled.div`
   min-height: 70vh;
   color: white;
   font-size: 1.2rem;
+  font-family: "Source Sans Pro", sans-serif;
 
   &:after {
     content: "";
@@ -190,6 +288,7 @@ const ArticleNotFound = styled.div`
   align-items: center;
   min-height: 70vh;
   text-align: center;
+  font-family: "Source Sans Pro", sans-serif;
 
   h2 {
     font-size: 2rem;
@@ -197,7 +296,7 @@ const ArticleNotFound = styled.div`
   }
 
   p {
-    color: #888;
+    color: rgba(255, 255, 255, 0.7);
     margin-bottom: 2rem;
   }
 `;
@@ -224,6 +323,26 @@ const ArticleDetail = () => {
     window.scrollTo(0, 0);
   }, [id]);
 
+  // Format date in the style of "MARCH 26, 2025, 9:15 AM ET"
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+
+    const date = new Date(dateString);
+
+    // Format month, day, year
+    const month = date.toLocaleString("en-US", { month: "long" }).toUpperCase();
+    const day = date.getDate();
+    const year = date.getFullYear();
+
+    // Format time
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const formattedHours = hours % 12 || 12;
+
+    return `${month} ${day}, ${year}, ${formattedHours}:${minutes} ${ampm} ET`;
+  };
+
   if (loading) return <Loading>Loading article</Loading>;
 
   if (!article) {
@@ -237,32 +356,51 @@ const ArticleDetail = () => {
 
   return (
     <ArticleWrapper>
-      <ArticleHeader>
-        {article.category && <Category>{article.category}</Category>}
-        <Title>{article.title}</Title>
-        <Meta>
-          <span>
-            {new Date(article.publishedAt).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </span>
-        </Meta>
-      </ArticleHeader>
+      {article.category && (
+        <ArticleCategory>{article.category}</ArticleCategory>
+      )}
+      <ArticleTitle>{article.title}</ArticleTitle>
+
+      {article.summary && <ArticleSubtitle>{article.summary}</ArticleSubtitle>}
+
+      <ArticleByline>By {article.author || "Admin"}</ArticleByline>
 
       {article.coverImage && (
-        <>
-          <CoverImageContainer>
-            <CoverImage src={article.coverImage} alt={article.title} />
-          </CoverImageContainer>
+        <CoverImageContainer>
+          <CoverImage src={article.coverImage} alt={article.title} />
           {article.photoCredit && (
-            <PhotoCredit>Photo: {article.photoCredit}</PhotoCredit>
+            <ImageCaption>Photo: {article.photoCredit}</ImageCaption>
           )}
-        </>
+        </CoverImageContainer>
       )}
 
+      <ArticleMeta>
+        <ArticleDate>{formatDate(article.publishedAt)}</ArticleDate>
+        <ShareTools>
+          <ShareButton>SHARE</ShareButton>
+        </ShareTools>
+      </ArticleMeta>
+
       <Content dangerouslySetInnerHTML={{ __html: article.content }} />
+
+      {/* Citations Section */}
+      {article.citations && article.citations.length > 0 && (
+        <CitationsContainer>
+          <CitationsTitle>Sources</CitationsTitle>
+          <CitationsList>
+            {article.citations.map((citation, index) => (
+              <CitationItem
+                key={index}
+                href={citation.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {citation.title}
+              </CitationItem>
+            ))}
+          </CitationsList>
+        </CitationsContainer>
+      )}
 
       {article.tags && article.tags.length > 0 && (
         <TagsContainer>

@@ -1,3 +1,4 @@
+// server/models/Article.js
 const mongoose = require("mongoose");
 
 const ArticleSchema = new mongoose.Schema({
@@ -12,12 +13,32 @@ const ArticleSchema = new mongoose.Schema({
   summary: {
     type: String,
   },
+  author: {
+    type: String,
+    default: "Admin",
+  },
+  category: {
+    type: String,
+  },
   coverImage: {
+    type: String,
+  },
+  photoCredit: {
     type: String,
   },
   tags: [
     {
       type: String,
+    },
+  ],
+  citations: [
+    {
+      title: {
+        type: String,
+      },
+      url: {
+        type: String,
+      },
     },
   ],
   published: {

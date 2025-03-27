@@ -8,7 +8,6 @@ const Card = styled.div`
   margin-bottom: 2rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   transition: transform 0.3s ease;
-
   &:hover {
     transform: translateY(-5px);
   }
@@ -26,7 +25,6 @@ const ArticleImage = styled.div`
   padding-bottom: 56.25%; /* 16:9 aspect ratio */
   position: relative;
   overflow: hidden;
-
   img {
     position: absolute;
     top: 0;
@@ -36,11 +34,9 @@ const ArticleImage = styled.div`
     object-fit: cover;
     transition: transform 0.5s ease;
   }
-
   &:hover img {
     transform: scale(1.05);
   }
-
   &:after {
     content: "";
     position: absolute;
@@ -74,6 +70,19 @@ const ArticleTitle = styled.h2`
   letter-spacing: -0.5px;
 `;
 
+const ArticleMetadata = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+`;
+
+const Author = styled.span`
+  font-weight: 500;
+`;
+
 const ArticleSummary = styled.p`
   font-size: 0.95rem;
   line-height: 1.6;
@@ -95,7 +104,6 @@ const ReadMore = styled.span`
   font-weight: 600;
   color: #ffffff;
   position: relative;
-
   &:after {
     content: "";
     position: absolute;
@@ -108,7 +116,6 @@ const ReadMore = styled.span`
     transform-origin: right;
     transition: transform 0.3s ease;
   }
-
   ${Card}:hover &:after {
     transform: scaleX(1);
     transform-origin: left;
@@ -130,16 +137,33 @@ const Tag = styled.span`
   color: rgba(255, 255, 255, 0.7);
 `;
 
+// New component for citation count indicator
+const CitationCount = styled.div`
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
 const ArticleCard = ({ article }) => {
   const {
     _id,
     title,
     summary,
     category,
+    author,
     publishedAt,
     coverImage,
     photoCredit,
     tags,
+    citations,
   } = article;
 
   const formatDate = (dateString) => {
@@ -158,6 +182,12 @@ const ArticleCard = ({ article }) => {
         <ArticleInfo>
           {category && <ArticleCategory>{category}</ArticleCategory>}
           <ArticleTitle>{title}</ArticleTitle>
+
+          <ArticleMetadata>
+            {author && <Author>By {author}</Author>}
+            {publishedAt && <span>• {formatDate(publishedAt)}</span>}
+          </ArticleMetadata>
+
           {summary && <ArticleSummary>{summary}</ArticleSummary>}
 
           <ReadMore>Read article</ReadMore>
@@ -166,6 +196,33 @@ const ArticleCard = ({ article }) => {
             <span>{publishedAt ? formatDate(publishedAt) : "Draft"}</span>
             {photoCredit && <span>Photo: {photoCredit}</span>}
           </ArticleFooter>
+
+          {citations && citations.length > 0 && (
+            <CitationCount>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7 8H3C2.44772 8 2 8.44772 2 9V14C2 14.5523 2.44772 15 3 15H7V18C7 18.5523 7.44772 19 8 19H9C9.55228 19 10 18.5523 10 18V9C10 8.44772 9.55228 8 9 8H8C7.44772 8 7 8.44772 7 9V15"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M17 8H13C12.4477 8 12 8.44772 12 9V14C12 14.5523 12.4477 15 13 15H17V18C17 18.5523 17.4477 19 18 19H19C19.5523 19 20 18.5523 20 18V9C20 8.44772 19.5523 8 19 8H18C17.4477 8 17 8.44772 17 9V15"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              {citations.length} {citations.length === 1 ? "Source" : "Sources"}{" "}
+              Cited
+            </CitationCount>
+          )}
 
           {tags && tags.length > 0 && (
             <TagsContainer>
