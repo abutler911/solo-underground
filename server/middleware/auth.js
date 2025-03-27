@@ -37,31 +37,51 @@ const siteAuth = (req, res, next) => {
 const adminAuth = async (req, res, next) => {
   try {
     // Get token from header
-    const token = req.header("Authorization")?.replace("Bearer ", "");
+    const authHeader = req.header("Authorization");
+    console.log("Auth header received:", authHeader ? "Present" : "Missing");
+
+    const token = authHeader?.replace("Bearer ", "");
 
     if (!token) {
-      return res
-        .status(401)
-        .json({ message: "No token, authorization denied" });
+      console.log("No token provided in request");
+      return res.status(401).json({ message: "Authentication required" });
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Find user
-    const user = await User.findById(decoded.userId);
+      // Check for userId in token payload
+      if (!decoded.userId) {
+        console.log("Token is valid but not an admin token (no userId)");
+        return res.status(401).json({ message: "Not authorized as admin" });
+      }
 
-    if (!user || !user.isAdmin) {
-      return res.status(401).json({ message: "Not authorized as admin" });
+      // Find user
+      const user = await User.findById(decoded.userId);
+
+      if (!user) {
+        console.log("User not found with ID from token");
+        return res.status(401).json({ message: "User not found" });
+      }
+
+      if (!user.isAdmin) {
+        console.log("User found but not admin:", user.username);
+        return res.status(401).json({ message: "Not authorized as admin" });
+      }
+
+      console.log("Admin auth successful for user:", user.username);
+      req.user = user;
+      next();
+    } catch (err) {
+      console.log("Token verification failed:", err.message);
+      return res.status(401).json({ message: "Invalid or expired token" });
     }
-
-    req.user = user;
-    next();
   } catch (err) {
-    res.status(401).json({ message: "Token is not valid" });
+    console.error("Admin auth error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
-
 module.exports = {
   siteAuth,
   adminAuth,
