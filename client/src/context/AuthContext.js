@@ -37,7 +37,6 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      console.log("Attempting login with:", { username });
       // Use the api instance instead of axios directly
       const res = await api.post("/api/admin/login", {
         username,

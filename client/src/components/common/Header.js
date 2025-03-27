@@ -89,41 +89,6 @@ const ProfileContainer = styled.div`
   gap: 1rem;
 `;
 
-const ProfileIcon = styled.div`
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-  }
-`;
-
-const AdminButton = styled(Link)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-  }
-`;
-
 const MobileMenuButton = styled.button`
   background: none;
   border: none;
@@ -131,11 +96,10 @@ const MobileMenuButton = styled.button`
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0.25rem;
-  margin-left: 1rem;
   display: block;
 
   @media (min-width: 768px) {
-    display: none;
+    margin-left: 1rem;
   }
 `;
 
@@ -221,11 +185,6 @@ const Header = () => {
           </NavLink>
 
           <ProfileContainer>
-            {isAuthenticated ? (
-              <AdminButton to="/admin">Admin</AdminButton>
-            ) : (
-              <ProfileIcon />
-            )}
             <MobileMenuButton onClick={toggleMobileMenu}>☰</MobileMenuButton>
           </ProfileContainer>
         </Nav>
