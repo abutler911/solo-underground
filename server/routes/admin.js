@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const Article = require("../models/Article");
-const auth = require("../middleware/auth");
+const { adminAuth } = require("../middleware/auth");
 
 // Admin login route
 router.post("/login", async (req, res) => {
@@ -38,7 +38,7 @@ router.post("/login", async (req, res) => {
 });
 
 // Get all articles (for admin, including drafts)
-router.get("/articles", auth, async (req, res) => {
+router.get("/articles", adminAuth, async (req, res) => {
   try {
     const articles = await Article.find().sort({ updatedAt: -1 });
     res.json(articles);
@@ -48,7 +48,7 @@ router.get("/articles", auth, async (req, res) => {
 });
 
 // Get single article by ID
-router.get("/articles/:id", auth, async (req, res) => {
+router.get("/articles/:id", adminAuth, async (req, res) => {
   try {
     const article = await Article.findById(req.params.id);
     if (!article) return res.status(404).json({ message: "Article not found" });
@@ -59,7 +59,7 @@ router.get("/articles/:id", auth, async (req, res) => {
 });
 
 // Create article
-router.post("/articles", auth, async (req, res) => {
+router.post("/articles", adminAuth, async (req, res) => {
   try {
     const article = new Article({
       ...req.body,
@@ -73,7 +73,7 @@ router.post("/articles", auth, async (req, res) => {
 });
 
 // Update article
-router.put("/articles/:id", auth, async (req, res) => {
+router.put("/articles/:id", adminAuth, async (req, res) => {
   try {
     const updates = { ...req.body };
 
@@ -97,7 +97,7 @@ router.put("/articles/:id", auth, async (req, res) => {
 });
 
 // Delete article
-router.delete("/articles/:id", auth, async (req, res) => {
+router.delete("/articles/:id", adminAuth, async (req, res) => {
   try {
     const article = await Article.findByIdAndDelete(req.params.id);
 

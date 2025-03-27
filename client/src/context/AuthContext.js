@@ -8,24 +8,39 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Two separate auth states for site access and admin access
+  const [isSiteAuthenticated, setIsSiteAuthenticated] = useState(false);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem("token");
-
-      if (token) {
+      // Check site access first
+      const siteToken = localStorage.getItem("site_token");
+      if (siteToken) {
         try {
-          // Verify token with backend
-          await axios.get("/api/admin/verify", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
-          setIsAuthenticated(true);
+          // Set default headers for all future requests
+          api.defaults.headers.common["Authorization"] = `Bearer ${siteToken}`;
+          setIsSiteAuthenticated(true);
         } catch (err) {
-          localStorage.removeItem("token");
-          setIsAuthenticated(false);
+          localStorage.removeItem("site_token");
+          setIsSiteAuthenticated(false);
+        }
+      }
+
+      // Then check admin access if needed
+      const adminToken = localStorage.getItem("admin_token");
+      if (adminToken) {
+        try {
+          // Verify admin token with backend
+          await api.get("/api/admin/verify", {
+            headers: { Authorization: `Bearer ${adminToken}` },
+          });
+          setIsAdminAuthenticated(true);
+        } catch (err) {
+          localStorage.removeItem("admin_token");
+          setIsAdminAuthenticated(false);
         }
       }
 
@@ -35,29 +50,78 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (username, password) => {
+  // Site login function
+  const siteLogin = async (password) => {
+    setError("");
     try {
-      // Use the api instance instead of axios directly
-      const res = await api.post("/api/admin/login", {
-        username,
-        password,
-      });
-      localStorage.setItem("token", res.data.token);
-      setIsAuthenticated(true);
+      const res = await api.post("/api/auth/site-access", { password });
+      localStorage.setItem("site_token", res.data.token);
+
+      // Set default headers for all future requests
+      api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
+
+      setIsSiteAuthenticated(true);
       return true;
     } catch (err) {
-      console.error("Login error", err);
+      console.error("Site login error", err);
+      setError(err.response?.data?.message || "Invalid site password");
       return false;
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setIsAuthenticated(false);
+  // Admin login function (existing one)
+  const adminLogin = async (username, password) => {
+    setError("");
+    try {
+      const res = await api.post("/api/admin/login", {
+        username,
+        password,
+      });
+      localStorage.setItem("admin_token", res.data.token);
+      setIsAdminAuthenticated(true);
+      return true;
+    } catch (err) {
+      console.error("Admin login error", err);
+      setError(err.response?.data?.message || "Invalid admin credentials");
+      return false;
+    }
   };
 
+  // Logout function
+  const logout = (type = "both") => {
+    if (type === "site" || type === "both") {
+      localStorage.removeItem("site_token");
+      setIsSiteAuthenticated(false);
+    }
+
+    if (type === "admin" || type === "both") {
+      localStorage.removeItem("admin_token");
+      setIsAdminAuthenticated(false);
+    }
+
+    // If logging out of site, also log out of admin
+    if (type === "site") {
+      localStorage.removeItem("admin_token");
+      setIsAdminAuthenticated(false);
+    }
+  };
+
+  // Combined authentication status
+  const isAuthenticated = isSiteAuthenticated;
+  const isAdmin = isAdminAuthenticated;
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        isAdmin,
+        loading,
+        error,
+        siteLogin,
+        adminLogin,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

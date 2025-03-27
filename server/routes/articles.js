@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Article = require("../models/Article");
-const auth = require("../middleware/auth"); // For protected routes
+const { adminAuth } = require("../middleware/auth");
 
 // Get all published articles
 router.get("/", async (req, res) => {
@@ -27,7 +27,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create article (protected)
-router.post("/", auth, async (req, res) => {
+router.post("/", adminAuth, async (req, res) => {
   const article = new Article({
     title: req.body.title,
     content: req.body.content,
@@ -45,7 +45,7 @@ router.post("/", auth, async (req, res) => {
 });
 
 // Update article (protected)
-router.patch("/:id", auth, async (req, res) => {
+router.patch("/:id", adminAuth, async (req, res) => {
   try {
     req.body.updatedAt = Date.now();
     if (req.body.published && !req.body.publishedAt) {
@@ -62,7 +62,7 @@ router.patch("/:id", auth, async (req, res) => {
 });
 
 // Delete article (protected)
-router.delete("/:id", auth, async (req, res) => {
+router.delete("/:id", adminAuth, async (req, res) => {
   try {
     await Article.findByIdAndDelete(req.params.id);
     res.json({ message: "Article deleted" });

@@ -7,6 +7,7 @@ require("dotenv").config();
 // Import routes
 const articlesRoutes = require("./routes/articles");
 const adminRoutes = require("./routes/admin");
+const authRoutes = require("./routes/auth"); // Add this line
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,7 +25,6 @@ app.use(
     credentials: true, // Allow cookies/auth headers
   })
 );
-
 app.use(express.json());
 
 // Debug middleware - log all requests
@@ -51,6 +51,7 @@ mongoose
   });
 
 // Routes
+app.use("/api/auth", authRoutes); // Add this line
 app.use("/api/articles", articlesRoutes);
 app.use("/api/admin", adminRoutes);
 
