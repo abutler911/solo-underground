@@ -688,13 +688,10 @@ const ArticleEditor = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("image", file); // Make sure the field name matches what your server expects
-
     setImageUploading(true);
 
     try {
-      // Get the admin token directly
+      // Get the admin token
       const adminToken = localStorage.getItem("admin_token");
 
       if (!adminToken) {
@@ -703,35 +700,31 @@ const ArticleEditor = () => {
         return;
       }
 
-      // Create a custom config for the FormData upload
-      const config = {
+      // Create FormData for the file
+      const formData = new FormData();
+      formData.append("image", file);
+
+      // Send to server with proper admin token in header
+      const response = await api.post("/api/upload/image", formData, {
         headers: {
+          "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${adminToken}`,
-          "Content-Type": "multipart/form-data", // Important for file uploads
         },
-      };
+      });
 
-      // Make the request directly using axios to properly handle FormData
-      const res = await api.post("/api/upload/image", formData, config);
-
-      // Update the form with the returned image URL
-      setFormData((prev) => ({
-        ...prev,
-        coverImage: res.data.url,
-      }));
-
-      setImageUploading(false);
+      // Check response and update the form
+      if (response.data && response.data.url) {
+        setFormData((prev) => ({
+          ...prev,
+          coverImage: response.data.url,
+        }));
+      } else {
+        throw new Error("No image URL returned from server");
+      }
     } catch (err) {
       console.error("Error uploading image:", err);
-
-      // Handle authentication errors
-      if (err.response && err.response.status === 401) {
-        alert("Your admin session has expired. Please log in again.");
-        navigate("/admin/login");
-        return;
-      }
-
-      alert("Failed to upload image. Please try again.");
+      alert("Image upload failed. Please try again.");
+    } finally {
       setImageUploading(false);
     }
   };
