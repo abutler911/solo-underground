@@ -245,12 +245,15 @@ const Header = () => {
         <MobileNavLink to="/search" onClick={toggleMobileMenu}>
           Search
         </MobileNavLink>
-        <MobileNavLink to="/admin" onClick={toggleMobileMenu}>
-          Admin Login
-        </MobileNavLink>
-        {isAuthenticated && (
+
+        {/* Conditionally show either Admin Login or Admin based on authentication status */}
+        {isAuthenticated ? (
           <MobileNavLink to="/admin" onClick={toggleMobileMenu}>
             Admin
+          </MobileNavLink>
+        ) : (
+          <MobileNavLink to="/admin" onClick={toggleMobileMenu}>
+            Admin Login
           </MobileNavLink>
         )}
       </MobileMenu>
