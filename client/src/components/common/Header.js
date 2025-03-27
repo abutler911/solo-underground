@@ -216,8 +216,8 @@ const Header = () => {
           <NavLink to="/audio" $active={isActive("/audio")}>
             Audio
           </NavLink>
-          <NavLink to="/explore" $active={isActive("/explore")}>
-            Explore
+          <NavLink to="/admin" $active={isActive("/admin")}>
+            Admin
           </NavLink>
 
           <ProfileContainer>
@@ -242,11 +242,11 @@ const Header = () => {
         <MobileNavLink to="/audio" onClick={toggleMobileMenu}>
           Audio
         </MobileNavLink>
-        <MobileNavLink to="/explore" onClick={toggleMobileMenu}>
-          Explore
-        </MobileNavLink>
         <MobileNavLink to="/search" onClick={toggleMobileMenu}>
           Search
+        </MobileNavLink>
+        <MobileNavLink to="/admin" onClick={toggleMobileMenu}>
+          Admin Login
         </MobileNavLink>
         {isAuthenticated && (
           <MobileNavLink to="/admin" onClick={toggleMobileMenu}>
