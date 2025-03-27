@@ -511,7 +511,7 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = () => {
-    logout();
+    logout("admin");
     navigate("/admin/login");
   };
 
