@@ -1,4 +1,3 @@
-// client/src/components/admin/ImageUploader.js
 import React, { useState } from "react";
 import styled from "styled-components";
 import api from "../../utils/api";
@@ -134,22 +133,28 @@ const ImageUploader = ({ value, onChange, onCreditChange, photoCredit }) => {
     setError("");
 
     try {
-      // Create FormData for the file
       const formData = new FormData();
       formData.append("image", file);
 
       console.log("Uploading image:", file.name);
 
-      // Send to server endpoint
+      const adminToken = localStorage.getItem("admin_token");
+
+      if (!adminToken) {
+        setError("Admin authentication required");
+        setIsUploading(false);
+        return;
+      }
+
       const response = await api.post("/api/upload/image", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${adminToken}`,
         },
       });
 
       console.log("Upload response:", response.data);
 
-      // Check response and update the form
       if (response.data && response.data.url) {
         onChange(response.data.url);
       } else {
@@ -158,7 +163,6 @@ const ImageUploader = ({ value, onChange, onCreditChange, photoCredit }) => {
     } catch (err) {
       console.error("Error uploading image:", err);
 
-      // Set error message
       if (err.response && err.response.data && err.response.data.message) {
         setError(`Upload failed: ${err.response.data.message}`);
       } else if (err.message) {
@@ -171,7 +175,6 @@ const ImageUploader = ({ value, onChange, onCreditChange, photoCredit }) => {
     }
   };
 
-  // For development testing without a server - creates a temporary local URL
   const handleLocalImagePreview = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -180,12 +183,8 @@ const ImageUploader = ({ value, onChange, onCreditChange, photoCredit }) => {
     setError("");
 
     try {
-      // Create a temporary local URL for the file
       const tempUrl = URL.createObjectURL(file);
-
-      // Update with the temporary URL
       onChange(tempUrl);
-
       console.log("Created temporary local preview:", tempUrl);
     } catch (err) {
       console.error("Error creating preview:", err);
@@ -201,7 +200,7 @@ const ImageUploader = ({ value, onChange, onCreditChange, photoCredit }) => {
       <UploadInput
         type="file"
         accept="image/*"
-        onChange={handleImageUpload} // Use handleLocalImagePreview for local testing
+        onChange={handleImageUpload}
         disabled={isUploading}
       />
       <InputNote>Recommended size: 1600x900px (16:9 ratio)</InputNote>
