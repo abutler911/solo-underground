@@ -17,11 +17,14 @@ app.use(
     origin: [
       "http://localhost:3000", // For local development
       "https://solo-underground.netlify.app", // Your Netlify domain
+      "https://solounderground.com", // Your custom domain
+      "https://www.solounderground.com", // www subdomain
     ],
     methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
     credentials: true, // Allow cookies/auth headers
   })
 );
+
 app.use(express.json());
 
 // Debug middleware - log all requests
@@ -30,7 +33,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// MongoDB Connection - Add this section
+// MongoDB Connection
 mongoose
   .connect(
     process.env.MONGO_URI || "mongodb://localhost:27017/solounderground",
