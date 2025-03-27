@@ -4,18 +4,15 @@ import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import api from "../utils/api";
 
-// Global style for importing fonts - add this to index.html instead
-// <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
-
 const ArticleWrapper = styled.article`
   max-width: 740px;
   margin: 0 auto;
   padding: 0 1.5rem 4rem;
-  font-family: "Libre Baskerville", Georgia, serif;
+  font-family: "PT Serif", Georgia, serif;
 `;
 
 const ArticleCategory = styled.div`
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Libre Franklin", sans-serif;
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.05rem;
@@ -26,6 +23,7 @@ const ArticleCategory = styled.div`
 `;
 
 const ArticleTitle = styled.h1`
+  font-family: "Merriweather", Georgia, serif;
   font-size: 2.6rem;
   line-height: 1.2;
   font-weight: 700;
@@ -39,7 +37,7 @@ const ArticleTitle = styled.h1`
 `;
 
 const ArticleSubtitle = styled.div`
-  font-family: "Libre Baskerville", Georgia, serif;
+  font-family: "PT Serif", Georgia, serif;
   font-size: 1rem; /* Reduced from 1.25rem */
   line-height: 1.5;
   margin-bottom: 1.5rem;
@@ -50,7 +48,7 @@ const ArticleSubtitle = styled.div`
 `;
 
 const ArticleByline = styled.div`
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Libre Franklin", sans-serif;
   font-weight: 600;
   font-size: 0.95rem;
   margin: 1.5rem 0;
@@ -70,7 +68,7 @@ const CoverImage = styled.img`
 `;
 
 const ImageCaption = styled.div`
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Libre Franklin", sans-serif;
   font-size: 0.8rem;
   line-height: 1.5;
   margin-top: 0.5rem;
@@ -79,7 +77,7 @@ const ImageCaption = styled.div`
 `;
 
 const ArticleMeta = styled.div`
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Libre Franklin", sans-serif;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -107,7 +105,7 @@ const ShareButton = styled.button`
   color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
   font-size: 0.85rem;
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Libre Franklin", sans-serif;
   letter-spacing: 0.05rem;
   text-transform: uppercase;
   padding: 0;
@@ -120,7 +118,8 @@ const ShareButton = styled.button`
 const Content = styled.div`
   color: rgba(255, 255, 255, 0.9);
   font-size: 1.1rem;
-  line-height: 1.8;
+  line-height: 1.85;
+  font-family: "PT Serif", Georgia, serif;
 
   p {
     margin-bottom: 1.75rem;
@@ -136,7 +135,7 @@ const Content = styled.div`
 
   h2,
   h3 {
-    font-family: "Source Sans Pro", sans-serif;
+    font-family: "Merriweather", Georgia, serif;
     font-weight: 700;
     margin: 2.5rem 0 1.25rem;
   }
@@ -201,7 +200,7 @@ const TagsContainer = styled.div`
   margin: 3rem 0 0;
   padding-top: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Libre Franklin", sans-serif;
 `;
 
 const Tag = styled.span`
@@ -224,7 +223,7 @@ const CitationsContainer = styled.div`
   margin: 3rem 0 0;
   padding-top: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Libre Franklin", sans-serif;
 `;
 
 const CitationsTitle = styled.h3`
@@ -261,7 +260,7 @@ const Loading = styled.div`
   min-height: 70vh;
   color: white;
   font-size: 1.2rem;
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Libre Franklin", sans-serif;
 
   &:after {
     content: "";
@@ -288,7 +287,7 @@ const ArticleNotFound = styled.div`
   align-items: center;
   min-height: 70vh;
   text-align: center;
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Libre Franklin", sans-serif;
 
   h2 {
     font-size: 2rem;

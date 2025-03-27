@@ -8,6 +8,7 @@ const Card = styled.div`
   margin-bottom: 2rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   transition: transform 0.3s ease;
+  font-family: "PT Serif", Georgia, serif; /* Base font for body text */
   &:hover {
     transform: translateY(-5px);
   }
@@ -54,23 +55,26 @@ const ArticleInfo = styled.div`
 `;
 
 const ArticleCategory = styled.div`
+  font-family: "Libre Franklin", sans-serif; /* Sans-serif for metadata */
   font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
   font-weight: 600;
   margin-bottom: 0.75rem;
   color: rgba(255, 255, 255, 0.7);
 `;
 
 const ArticleTitle = styled.h2`
+  font-family: "Merriweather", Georgia, serif; /* Serif font for headlines */
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0.5rem 0 1rem;
-  line-height: 1.3;
-  letter-spacing: -0.5px;
+  line-height: 1.2;
+  letter-spacing: -0.25px;
 `;
 
 const ArticleMetadata = styled.div`
+  font-family: "Libre Franklin", sans-serif; /* Sans-serif for metadata */
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -85,12 +89,14 @@ const Author = styled.span`
 
 const ArticleSummary = styled.p`
   font-size: 0.95rem;
-  line-height: 1.6;
+  line-height: 1.7;
   color: rgba(255, 255, 255, 0.7);
   margin-bottom: 1.5rem;
+  font-family: "PT Serif", Georgia, serif; /* Serif for body text */
 `;
 
 const ArticleFooter = styled.div`
+  font-family: "Libre Franklin", sans-serif; /* Sans-serif for metadata */
   display: flex;
   justify-content: space-between;
   color: rgba(255, 255, 255, 0.5);
@@ -99,6 +105,7 @@ const ArticleFooter = styled.div`
 `;
 
 const ReadMore = styled.span`
+  font-family: "Libre Franklin", sans-serif; /* Sans-serif for UI elements */
   display: inline-block;
   font-size: 0.85rem;
   font-weight: 600;
@@ -130,6 +137,7 @@ const TagsContainer = styled.div`
 `;
 
 const Tag = styled.span`
+  font-family: "Libre Franklin", sans-serif; /* Sans-serif for UI elements */
   padding: 0.3rem 0.75rem;
   background-color: rgba(255, 255, 255, 0.08);
   border-radius: 2rem;
@@ -139,6 +147,7 @@ const Tag = styled.span`
 
 // New component for citation count indicator
 const CitationCount = styled.div`
+  font-family: "Libre Franklin", sans-serif; /* Sans-serif for metadata */
   margin-top: 0.5rem;
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.5);
@@ -171,9 +180,14 @@ const ArticleCard = ({ article }) => {
     return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
+  // Helper function for scroll to top when clicking an article
+  const handleArticleClick = () => {
+    window.scrollTo(0, 0);
+  };
+
   return (
     <Card>
-      <ArticleLink to={`/article/${_id}`}>
+      <ArticleLink to={`/article/${_id}`} onClick={handleArticleClick}>
         {coverImage && (
           <ArticleImage>
             <img src={coverImage} alt={title} />
