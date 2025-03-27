@@ -78,32 +78,20 @@ export const AuthProvider = ({ children }) => {
   const adminLogin = async (username, password) => {
     setError("");
     try {
-      // Store the current site token to restore later
-      const currentSiteToken = api.defaults.headers.common["Authorization"];
-
-      // Clear the authorization header for this specific request
-      delete api.defaults.headers.common["Authorization"];
-
+      // Important: Don't use the default authorization header for login requests
       const res = await api.post(
         "/api/admin/login",
-        {
-          username,
-          password,
-        },
-        {
-          headers: { Authorization: "" }, // Ensure no auth header is sent for login
-        }
+        { username, password },
+        { headers: { Authorization: "" } } // Explicitly clear the Authorization header
       );
 
+      // Store the admin token
       localStorage.setItem("admin_token", res.data.token);
       setIsAdminAuthenticated(true);
 
-      // Restore the site token for subsequent requests
-      api.defaults.headers.common["Authorization"] = currentSiteToken;
-
       return true;
     } catch (err) {
-      console.error("Admin login error", err);
+      console.error("Admin login error:", err);
       setError(err.response?.data?.message || "Invalid admin credentials");
       return false;
     }

@@ -5,6 +5,7 @@ import styled from "styled-components";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import api from "../../utils/api";
+import { adminRequest } from "../../utils/api";
 
 const EditorContainer = styled.div`
   max-width: 1000px;
@@ -601,7 +602,7 @@ const ArticleEditor = () => {
     if (isEditing) {
       const fetchArticle = async () => {
         try {
-          const res = await api.get(`/api/admin/articles/${id}`);
+          const res = await adminRequest("get", `/api/admin/articles/${id}`);
 
           // Extract any existing citations from the article data
           let loadedCitations = [];
@@ -620,6 +621,12 @@ const ArticleEditor = () => {
           setCitations(loadedCitations);
         } catch (err) {
           console.error("Error fetching article", err);
+
+          // Handle authentication errors
+          if (err.response && err.response.status === 401) {
+            alert("Your admin session has expired. Please log in again.");
+            navigate("/admin/login");
+          }
         }
       };
 
@@ -628,7 +635,7 @@ const ArticleEditor = () => {
 
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
-  }, [id, isEditing]);
+  }, [id, isEditing, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -682,31 +689,49 @@ const ArticleEditor = () => {
     if (!file) return;
 
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "solo_underground"); // Your Cloudinary upload preset
+    formData.append("image", file); // Make sure the field name matches what your server expects
 
     setImageUploading(true);
 
     try {
-      // Using Cloudinary directly from the frontend
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      // Get the admin token directly
+      const adminToken = localStorage.getItem("admin_token");
 
-      const data = await res.json();
+      if (!adminToken) {
+        alert("Admin authentication required");
+        setImageUploading(false);
+        return;
+      }
 
+      // Create a custom config for the FormData upload
+      const config = {
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+          "Content-Type": "multipart/form-data", // Important for file uploads
+        },
+      };
+
+      // Make the request directly using axios to properly handle FormData
+      const res = await api.post("/api/upload/image", formData, config);
+
+      // Update the form with the returned image URL
       setFormData((prev) => ({
         ...prev,
-        coverImage: data.secure_url,
+        coverImage: res.data.url,
       }));
 
       setImageUploading(false);
     } catch (err) {
-      console.error("Error uploading image", err);
+      console.error("Error uploading image:", err);
+
+      // Handle authentication errors
+      if (err.response && err.response.status === 401) {
+        alert("Your admin session has expired. Please log in again.");
+        navigate("/admin/login");
+        return;
+      }
+
+      alert("Failed to upload image. Please try again.");
       setImageUploading(false);
     }
   };
@@ -757,14 +782,20 @@ const ArticleEditor = () => {
 
       console.log("Submitting article data:", articleData);
 
+      let response;
       if (isEditing) {
-        const response = await api.put(
+        response = await adminRequest(
+          "put",
           `/api/admin/articles/${id}`,
           articleData
         );
         console.log("Update response:", response.data);
       } else {
-        const response = await api.post("/api/admin/articles", articleData);
+        response = await adminRequest(
+          "post",
+          "/api/admin/articles",
+          articleData
+        );
         console.log("Create response:", response.data);
       }
 
@@ -772,6 +803,13 @@ const ArticleEditor = () => {
       navigate("/admin");
     } catch (err) {
       console.error("Error saving article:", err);
+
+      // Handle authentication errors
+      if (err.response && err.response.status === 401) {
+        alert("Your admin session has expired. Please log in again.");
+        navigate("/admin/login");
+        return;
+      }
 
       // Show a more detailed error message
       if (err.response && err.response.data && err.response.data.message) {

@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
+import { adminRequest } from "../../utils/api";
 
 const DashboardContainer = styled.div`
   max-width: 1200px;
@@ -443,20 +444,19 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        // Get the admin token from localStorage
-        const adminToken = localStorage.getItem("admin_token");
-
-        // Include it in the request headers
-        const res = await api.get("/api/admin/articles", {
-          headers: {
-            Authorization: `Bearer ${adminToken}`,
-          },
-        });
-
+        setLoading(true);
+        const res = await adminRequest("get", "/api/admin/articles");
         setArticles(res.data);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching articles", err);
+
+        // Handle unauthorized errors
+        if (err.response && err.response.status === 401) {
+          logout("admin");
+          navigate("/admin/login");
+        }
+
         setLoading(false);
       }
     };
@@ -495,17 +495,16 @@ const AdminDashboard = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this article?")) {
       try {
-        const adminToken = localStorage.getItem("admin_token");
-
-        await api.delete(`/api/admin/articles/${id}`, {
-          headers: {
-            Authorization: `Bearer ${adminToken}`,
-          },
-        });
-
+        await adminRequest("delete", `/api/admin/articles/${id}`);
         setArticles(articles.filter((article) => article._id !== id));
       } catch (err) {
         console.error("Error deleting article", err);
+
+        // Handle unauthorized errors
+        if (err.response && err.response.status === 401) {
+          logout("admin");
+          navigate("/admin/login");
+        }
       }
     }
   };
