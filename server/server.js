@@ -9,6 +9,7 @@ const articlesRoutes = require("./routes/articles");
 const adminRoutes = require("./routes/admin");
 const authRoutes = require("./routes/auth");
 const uploadRoutes = require("./routes/upload");
+const session = require("express-session");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -27,12 +28,19 @@ app.use(
   })
 );
 app.use(express.json());
-
-// Debug middleware - log all requests
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-});
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "keyboard cat",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24,
+    },
+  })
+);
 
 // MongoDB Connection
 mongoose
@@ -51,16 +59,16 @@ mongoose
     console.error("MongoDB connection error:", err);
   });
 
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url} | Origin: ${req.headers.origin}`);
+  next();
+});
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/articles", articlesRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/upload", uploadRoutes);
-
-// Simple test route
-app.get("/test", (req, res) => {
-  res.json({ message: "Server is running" });
-});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
