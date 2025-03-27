@@ -7,7 +7,8 @@ require("dotenv").config();
 // Import routes
 const articlesRoutes = require("./routes/articles");
 const adminRoutes = require("./routes/admin");
-const authRoutes = require("./routes/auth"); // Add this line
+const authRoutes = require("./routes/auth");
+const uploadRoutes = require("./routes/upload");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -51,9 +52,10 @@ mongoose
   });
 
 // Routes
-app.use("/api/auth", authRoutes); // Add this line
+app.use("/api/auth", authRoutes);
 app.use("/api/articles", articlesRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // Simple test route
 app.get("/test", (req, res) => {

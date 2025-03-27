@@ -8,6 +8,12 @@ const siteAuth = (req, res, next) => {
     // Get token from header
     const token = req.header("Authorization")?.replace("Bearer ", "");
 
+    console.log("Authorization header present:", !!req.header("Authorization"));
+    console.log(
+      "Token received:",
+      token ? token.substring(0, 10) + "..." : "No token"
+    );
+
     if (!token) {
       return res
         .status(401)
@@ -22,6 +28,7 @@ const siteAuth = (req, res, next) => {
     req.tokenData = decoded;
     next();
   } catch (err) {
+    console.error("Auth error:", err);
     res.status(401).json({ message: "Token is not valid" });
   }
 };
