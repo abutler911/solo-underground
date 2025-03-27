@@ -6,6 +6,8 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import api from "../../utils/api";
 import { adminRequest } from "../../utils/api";
+import EnhancedModal from "../common/EnhancedModal";
+import { useAuth } from "../../context/AuthContext";
 
 const EditorContainer = styled.div`
   max-width: 1000px;
@@ -446,7 +448,7 @@ const EditorSection = styled.div`
   }
 `;
 
-// New Citation components
+// Citation components
 const CitationsContainer = styled.div`
   margin-top: 1.5rem;
 `;
@@ -571,7 +573,16 @@ const formatLink = (url, text) => {
 const ArticleEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const isEditing = !!id;
+
+  // State for modal handling
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [showPublishConfirmModal, setShowPublishConfirmModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [validationMessage, setValidationMessage] = useState("");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -581,7 +592,7 @@ const ArticleEditor = () => {
     coverImage: "",
     photoCredit: "",
     tags: "",
-    author: "", // New author field
+    author: "",
   });
 
   // Array of citation objects
@@ -589,6 +600,7 @@ const ArticleEditor = () => {
 
   const [saving, setSaving] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
+  const [publishPending, setPublishPending] = useState(false);
 
   const categories = [
     "Politics",
@@ -598,6 +610,7 @@ const ArticleEditor = () => {
     "Lifestyle",
   ];
 
+  // Only fetch article data once on component mount if editing
   useEffect(() => {
     if (isEditing) {
       const fetchArticle = async () => {
@@ -624,8 +637,16 @@ const ArticleEditor = () => {
 
           // Handle authentication errors
           if (err.response && err.response.status === 401) {
-            alert("Your admin session has expired. Please log in again.");
-            navigate("/admin/login");
+            setErrorMessage(
+              "Your admin session has expired. Please log in again."
+            );
+            setShowErrorModal(true);
+          } else {
+            setErrorMessage(
+              "Failed to load article: " +
+                (err.response?.data?.message || "Unknown error")
+            );
+            setShowErrorModal(true);
           }
         }
       };
@@ -635,7 +656,7 @@ const ArticleEditor = () => {
 
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
-  }, [id, isEditing, navigate]);
+  }, [id, isEditing]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -695,17 +716,18 @@ const ArticleEditor = () => {
       const adminToken = localStorage.getItem("admin_token");
 
       if (!adminToken) {
-        alert("Admin authentication required");
+        setErrorMessage("Admin authentication required");
+        setShowErrorModal(true);
         setImageUploading(false);
         return;
       }
 
       // Create FormData for the file
-      const formData = new FormData();
-      formData.append("image", file);
+      const formDataObj = new FormData();
+      formDataObj.append("image", file);
 
       // Send to server with proper admin token in header
-      const response = await api.post("/api/upload/image", formData, {
+      const response = await api.post("/api/upload/image", formDataObj, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${adminToken}`,
@@ -723,13 +745,47 @@ const ArticleEditor = () => {
       }
     } catch (err) {
       console.error("Error uploading image:", err);
-      alert("Image upload failed. Please try again.");
+      setErrorMessage("Image upload failed. Please try again.");
+      setShowErrorModal(true);
     } finally {
       setImageUploading(false);
     }
   };
 
+  const validateForm = () => {
+    // Make sure required fields are provided
+    if (!formData.title) {
+      setValidationMessage("Please provide a title for the article.");
+      setShowValidationModal(true);
+      return false;
+    }
+
+    // Ensure content is not empty
+    if (!formData.content) {
+      setValidationMessage("Please add some content to your article.");
+      setShowValidationModal(true);
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (publish) => {
+    // If publishing and not already confirmed, show confirmation modal
+    if (publish && !publishPending) {
+      setPublishPending(true);
+      setShowPublishConfirmModal(true);
+      return;
+    }
+
+    // Clear pending flag if we got here from modal confirmation
+    setPublishPending(false);
+
+    // Validate before submitting
+    if (!validateForm()) {
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -746,20 +802,6 @@ const ArticleEditor = () => {
             .filter(Boolean)
         : [];
 
-      // Make sure required fields are provided
-      if (!formData.title) {
-        alert("Title is required");
-        setSaving(false);
-        return;
-      }
-
-      // Ensure content is not empty
-      if (!formData.content) {
-        alert("Content is required");
-        setSaving(false);
-        return;
-      }
-
       const articleData = {
         title: formData.title,
         content: formData.content,
@@ -769,51 +811,56 @@ const ArticleEditor = () => {
         photoCredit: formData.photoCredit || "",
         tags: tagsArray,
         published: publish,
-        author: formData.author || "Admin", // Use the author field or default to Admin
-        citations: validCitations, // Add citations to the article data
+        author: formData.author || "Admin",
+        citations: validCitations,
       };
 
       console.log("Submitting article data:", articleData);
 
-      let response;
       if (isEditing) {
-        response = await adminRequest(
-          "put",
-          `/api/admin/articles/${id}`,
-          articleData
-        );
-        console.log("Update response:", response.data);
+        await adminRequest("put", `/api/admin/articles/${id}`, articleData);
       } else {
-        response = await adminRequest(
-          "post",
-          "/api/admin/articles",
-          articleData
-        );
-        console.log("Create response:", response.data);
+        await adminRequest("post", "/api/admin/articles", articleData);
       }
 
-      // Success - redirect to admin dashboard
-      navigate("/admin");
+      // Show success modal
+      setShowSuccessModal(true);
     } catch (err) {
       console.error("Error saving article:", err);
+      setSaving(false);
 
       // Handle authentication errors
       if (err.response && err.response.status === 401) {
-        alert("Your admin session has expired. Please log in again.");
-        navigate("/admin/login");
-        return;
-      }
-
-      // Show a more detailed error message
-      if (err.response && err.response.data && err.response.data.message) {
-        alert(`Error: ${err.response.data.message}`);
+        setErrorMessage("Your admin session has expired. Please log in again.");
+        setShowErrorModal(true);
       } else {
-        alert(
-          "Failed to save article. Please check all required fields and try again."
-        );
+        // Show a more detailed error message
+        if (err.response?.data?.message) {
+          setErrorMessage(`Error: ${err.response.data.message}`);
+        } else {
+          setErrorMessage(
+            "Failed to save article. Please check all required fields and try again."
+          );
+        }
+        setShowErrorModal(true);
       }
+    }
+  };
 
-      setSaving(false);
+  // Handle modal close and navigate to dashboard
+  const handleSuccessClose = () => {
+    setShowSuccessModal(false);
+    navigate("/admin");
+  };
+
+  // Handle error modal close with authentication check
+  const handleErrorClose = () => {
+    setShowErrorModal(false);
+
+    // If session expired, redirect to login
+    if (errorMessage.includes("session has expired")) {
+      logout("admin");
+      navigate("/admin/login");
     }
   };
 
@@ -892,7 +939,7 @@ const ArticleEditor = () => {
             />
           </FormGroup>
 
-          {/* New Author field */}
+          {/* Author field */}
           <FormGroup>
             <Label>Author</Label>
             <Input
@@ -1025,8 +1072,7 @@ const ArticleEditor = () => {
             </AddCitationButton>
             <InputNote>
               Add citations with working URLs that will be linked in the
-              article. Click "Insert" to add a citation link to the editor at
-              the current cursor position.
+              article. Click "Insert" to add a citation link to the editor.
             </InputNote>
           </CitationsContainer>
         </EditorSection>
@@ -1137,6 +1183,94 @@ const ArticleEditor = () => {
         </ButtonGroup>
       </Form>
 
+      {/* Modals */}
+      {/* Success Modal */}
+      <EnhancedModal
+        isOpen={showSuccessModal}
+        onClose={handleSuccessClose}
+        title="Success"
+        size="small"
+        footer={
+          <Button className="primary" onClick={handleSuccessClose}>
+            OK
+          </Button>
+        }
+      >
+        {isEditing
+          ? "Your article has been updated successfully."
+          : "Your article has been created successfully."}
+      </EnhancedModal>
+
+      {/* Error Modal */}
+      <EnhancedModal
+        isOpen={showErrorModal}
+        onClose={handleErrorClose}
+        title="Error"
+        size="small"
+        footer={
+          <Button className="primary" onClick={handleErrorClose}>
+            OK
+          </Button>
+        }
+      >
+        {errorMessage}
+      </EnhancedModal>
+
+      {/* Validation Modal */}
+      <EnhancedModal
+        isOpen={showValidationModal}
+        onClose={() => setShowValidationModal(false)}
+        title="Required Fields"
+        size="small"
+        footer={
+          <Button
+            className="primary"
+            onClick={() => setShowValidationModal(false)}
+          >
+            OK
+          </Button>
+        }
+      >
+        {validationMessage}
+      </EnhancedModal>
+
+      {/* Publish Confirmation Modal */}
+      <EnhancedModal
+        isOpen={showPublishConfirmModal}
+        onClose={() => {
+          setShowPublishConfirmModal(false);
+          setPublishPending(false);
+        }}
+        title="Publish Article"
+        size="small"
+        footer={
+          <>
+            <Button
+              className="secondary"
+              onClick={() => {
+                setShowPublishConfirmModal(false);
+                setPublishPending(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="primary"
+              onClick={() => {
+                setShowPublishConfirmModal(false);
+                handleSubmit(true);
+              }}
+            >
+              Publish
+            </Button>
+          </>
+        }
+      >
+        This article will be visible to all site users. Are you sure you want to
+        publish it now?
+      </EnhancedModal>
+
+      {/* Loading overlay */}
       <LoadingOverlay $active={saving}>
         <LoadingContent>
           <LoadingSpinner />

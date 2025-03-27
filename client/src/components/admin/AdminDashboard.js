@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
 import { adminRequest } from "../../utils/api";
+import EnhancedModal from "../common/EnhancedModal";
 
 const DashboardContainer = styled.div`
   max-width: 1200px;
@@ -12,7 +12,7 @@ const DashboardContainer = styled.div`
   padding: 3rem 1.5rem;
 `;
 
-// New header components
+// Header components
 const AdminHeader = styled.header`
   position: relative;
   margin-bottom: 3.5rem;
@@ -256,7 +256,7 @@ const TabItem = styled.button`
   }
 `;
 
-// Existing components from original file
+// Table components
 const ArticlesTable = styled.div`
   width: 100%;
   background-color: rgba(255, 255, 255, 0.03);
@@ -425,6 +425,39 @@ const EmptyState = styled.div`
   font-style: italic;
 `;
 
+// Button components for modals
+const Button = styled.button`
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+
+  &.primary {
+    background: linear-gradient(
+      135deg,
+      rgba(70, 130, 180, 0.8) 0%,
+      rgba(50, 100, 150, 0.9) 100%
+    );
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  &.secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  &.danger {
+    background: rgba(220, 53, 69, 0.15);
+    color: rgba(255, 150, 150, 1);
+    border: 1px solid rgba(220, 53, 69, 0.2);
+  }
+`;
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -432,6 +465,15 @@ const AdminDashboard = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [articleToDelete, setArticleToDelete] = useState(null);
+
+  // Modal states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   // New state variables for the redesigned header
   const [activeTab, setActiveTab] = useState("all");
@@ -441,20 +483,28 @@ const AdminDashboard = () => {
     total: 0,
   });
 
+  // Only fetch articles once when the component mounts
   useEffect(() => {
     const fetchArticles = async () => {
       try {
         setLoading(true);
+
+        // Make a single request to fetch all articles
         const res = await adminRequest("get", "/api/admin/articles");
+
+        // Set articles and update loading state
         setArticles(res.data);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching articles", err);
 
-        // Handle unauthorized errors
+        // Handle error cases
         if (err.response && err.response.status === 401) {
-          logout("admin");
-          navigate("/admin/login");
+          setErrorMessage("Your session has expired. Please log in again.");
+          setShowErrorModal(true);
+        } else {
+          setErrorMessage("Failed to load articles. Please try again.");
+          setShowErrorModal(true);
         }
 
         setLoading(false);
@@ -462,9 +512,10 @@ const AdminDashboard = () => {
     };
 
     fetchArticles();
+
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
-  }, []);
+  }, []); // Empty dependency array means this runs once on mount
 
   // Calculate stats when articles load
   useEffect(() => {
@@ -492,38 +543,71 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this article?")) {
-      try {
-        await adminRequest("delete", `/api/admin/articles/${id}`);
-        setArticles(articles.filter((article) => article._id !== id));
-      } catch (err) {
-        console.error("Error deleting article", err);
+  const initiateDelete = (id, e) => {
+    if (e) e.stopPropagation(); // Prevent row selection
+    setArticleToDelete(id);
+    setShowDeleteModal(true);
+  };
 
-        // Handle unauthorized errors
-        if (err.response && err.response.status === 401) {
-          logout("admin");
-          navigate("/admin/login");
-        }
+  const confirmDelete = async () => {
+    if (!articleToDelete) return;
+
+    try {
+      await adminRequest("delete", `/api/admin/articles/${articleToDelete}`);
+
+      // Update local state to remove the deleted article
+      setArticles(
+        articles.filter((article) => article._id !== articleToDelete)
+      );
+      setShowDeleteModal(false);
+
+      // Show success message
+      setSuccessMessage("Article deleted successfully");
+      setShowSuccessModal(true);
+    } catch (err) {
+      console.error("Error deleting article", err);
+
+      // Handle authentication errors
+      if (err.response && err.response.status === 401) {
+        setErrorMessage("Your session has expired. Please log in again.");
+        setShowErrorModal(true);
+      } else {
+        setErrorMessage("Failed to delete article. Please try again.");
+        setShowErrorModal(true);
       }
     }
   };
 
-  const handleLogout = () => {
+  const initiateLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
     logout("admin");
+    setShowLogoutModal(false);
     navigate("/admin/login");
   };
 
-  if (loading)
+  // Handle modal close with error redirect
+  const handleErrorModalClose = () => {
+    setShowErrorModal(false);
+    if (errorMessage.includes("session has expired")) {
+      logout("admin");
+      navigate("/admin/login");
+    }
+  };
+
+  if (loading) {
     return (
       <LoadingContainer>
         <LoadingIndicator />
       </LoadingContainer>
     );
+  }
 
   return (
     <DashboardContainer>
-      {/* New Redesigned Header */}
+      {/* Redesigned Header */}
       <AdminHeader>
         <HeaderInner>
           <HeaderContent>
@@ -584,7 +668,7 @@ const AdminDashboard = () => {
               </svg>
               New Article
             </ActionButton>
-            <LogoutButton onClick={handleLogout}>
+            <LogoutButton onClick={initiateLogout}>
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -670,7 +754,7 @@ const AdminDashboard = () => {
                 </TableActionButton>
                 <TableActionButton
                   className="delete"
-                  onClick={() => handleDelete(article._id)}
+                  onClick={(e) => initiateDelete(article._id, e)}
                 >
                   Delete
                 </TableActionButton>
@@ -699,12 +783,92 @@ const AdminDashboard = () => {
           </FloatingButton>
           <FloatingButton
             className="delete"
-            onClick={() => handleDelete(selectedArticle)}
+            onClick={(e) => initiateDelete(selectedArticle, e)}
           >
             ×
           </FloatingButton>
         </MobileActions>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <EnhancedModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        title="Delete Article"
+        size="small"
+        footer={
+          <>
+            <Button
+              className="secondary"
+              onClick={() => setShowDeleteModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button className="danger" onClick={confirmDelete}>
+              Delete
+            </Button>
+          </>
+        }
+      >
+        Are you sure you want to delete this article? This action cannot be
+        undone.
+      </EnhancedModal>
+
+      {/* Logout Confirmation Modal */}
+      <EnhancedModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        title="Logout Confirmation"
+        size="small"
+        footer={
+          <>
+            <Button
+              className="secondary"
+              onClick={() => setShowLogoutModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button className="primary" onClick={confirmLogout}>
+              Logout
+            </Button>
+          </>
+        }
+      >
+        Are you sure you want to log out of the admin panel?
+      </EnhancedModal>
+
+      {/* Error Modal */}
+      <EnhancedModal
+        isOpen={showErrorModal}
+        onClose={handleErrorModalClose}
+        title="Error"
+        size="small"
+        footer={
+          <Button className="primary" onClick={handleErrorModalClose}>
+            OK
+          </Button>
+        }
+      >
+        {errorMessage}
+      </EnhancedModal>
+
+      {/* Success Modal */}
+      <EnhancedModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title="Success"
+        size="small"
+        footer={
+          <Button
+            className="primary"
+            onClick={() => setShowSuccessModal(false)}
+          >
+            OK
+          </Button>
+        }
+      >
+        {successMessage}
+      </EnhancedModal>
     </DashboardContainer>
   );
 };
