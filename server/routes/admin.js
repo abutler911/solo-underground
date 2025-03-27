@@ -8,18 +8,24 @@ const Article = require("../models/Article");
 const { adminAuth } = require("../middleware/auth");
 
 // Admin login route
+// In server/routes/admin.js
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
+    console.log("Admin login attempt:", username);
 
     // Check if user exists
     const user = await User.findOne({ username });
+    console.log("User found:", !!user);
+
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log("Password match:", isMatch);
+
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -31,10 +37,24 @@ router.post("/login", async (req, res) => {
       { expiresIn: "1d" }
     );
 
+    console.log("Admin token created");
     res.json({ token });
   } catch (err) {
+    console.error("Admin login error:", err);
     res.status(500).json({ message: "Server error" });
   }
+});
+
+router.get("/verify", adminAuth, (req, res) => {
+  // If request gets here, the token is valid (adminAuth middleware validated it)
+  res.json({
+    success: true,
+    user: {
+      id: req.user._id,
+      username: req.user.username,
+      isAdmin: req.user.isAdmin,
+    },
+  });
 });
 
 // Get all articles (for admin, including drafts)

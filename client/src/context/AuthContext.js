@@ -1,6 +1,6 @@
 // client/src/context/AuthContext.js
 import React, { createContext, useState, useContext, useEffect } from "react";
-import axios from "axios";
+
 import api from "../utils/api";
 
 const AuthContext = createContext();
@@ -33,10 +33,16 @@ export const AuthProvider = ({ children }) => {
       const adminToken = localStorage.getItem("admin_token");
       if (adminToken) {
         try {
-          // Verify admin token with backend
-          await api.get("/api/admin/verify", {
-            headers: { Authorization: `Bearer ${adminToken}` },
-          });
+          // Temporarily replace the authorization header
+          const currentSiteToken = api.defaults.headers.common["Authorization"];
+          api.defaults.headers.common["Authorization"] = `Bearer ${adminToken}`;
+
+          // Verify admin token
+          await api.get("/api/admin/verify");
+
+          // Restore the site token
+          api.defaults.headers.common["Authorization"] = currentSiteToken;
+
           setIsAdminAuthenticated(true);
         } catch (err) {
           localStorage.removeItem("admin_token");
@@ -69,16 +75,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Admin login function (existing one)
   const adminLogin = async (username, password) => {
     setError("");
     try {
-      const res = await api.post("/api/admin/login", {
-        username,
-        password,
-      });
+      // Store the current site token to restore later
+      const currentSiteToken = api.defaults.headers.common["Authorization"];
+
+      // Clear the authorization header for this specific request
+      delete api.defaults.headers.common["Authorization"];
+
+      const res = await api.post(
+        "/api/admin/login",
+        {
+          username,
+          password,
+        },
+        {
+          headers: { Authorization: "" }, // Ensure no auth header is sent for login
+        }
+      );
+
       localStorage.setItem("admin_token", res.data.token);
       setIsAdminAuthenticated(true);
+
+      // Restore the site token for subsequent requests
+      api.defaults.headers.common["Authorization"] = currentSiteToken;
+
       return true;
     } catch (err) {
       console.error("Admin login error", err);

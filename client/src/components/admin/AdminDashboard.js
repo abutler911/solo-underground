@@ -443,7 +443,16 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const res = await api.get("/api/admin/articles");
+        // Get the admin token from localStorage
+        const adminToken = localStorage.getItem("admin_token");
+
+        // Include it in the request headers
+        const res = await api.get("/api/admin/articles", {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        });
+
         setArticles(res.data);
         setLoading(false);
       } catch (err) {
@@ -486,7 +495,14 @@ const AdminDashboard = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this article?")) {
       try {
-        await api.delete(`/api/admin/articles/${id}`);
+        const adminToken = localStorage.getItem("admin_token");
+
+        await api.delete(`/api/admin/articles/${id}`, {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        });
+
         setArticles(articles.filter((article) => article._id !== id));
       } catch (err) {
         console.error("Error deleting article", err);

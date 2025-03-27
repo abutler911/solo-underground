@@ -181,7 +181,7 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { adminLogin } = useAuth();
 
   useEffect(() => {
     // Add a subtle animation when the component mounts
@@ -203,7 +203,7 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      const success = await login(formData.username, formData.password);
+      const success = await adminLogin(formData.username, formData.password);
 
       if (success) {
         navigate("/admin");
