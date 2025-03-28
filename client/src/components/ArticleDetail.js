@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import api from "../utils/api";
+import FeaturedQuote from "./FeaturedQuote";
 
 const ArticleWrapper = styled.article`
   max-width: 740px;
@@ -120,6 +121,14 @@ const Content = styled.div`
   font-size: 1.1rem;
   line-height: 1.85;
   font-family: "PT Serif", Georgia, serif;
+  position: relative;
+
+  /* This ensures floats are contained */
+  &:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
 
   p {
     margin-bottom: 1.75rem;
@@ -138,6 +147,7 @@ const Content = styled.div`
     font-family: "Merriweather", Georgia, serif;
     font-weight: 700;
     margin: 2.5rem 0 1.25rem;
+    clear: both;
   }
 
   h2 {
@@ -342,6 +352,65 @@ const ArticleDetail = () => {
     return `${month} ${day}, ${year}, ${formattedHours}:${minutes} ${ampm} ET`;
   };
 
+  // New function to render content with embedded quotes
+  const renderContentWithQuotes = () => {
+    if (!article) return null;
+
+    // If there are no quotes, just render the content
+    if (!article.quotes || article.quotes.length === 0) {
+      return <div dangerouslySetInnerHTML={{ __html: article.content }} />;
+    }
+
+    // Distributing quotes throughout the article
+    const paragraphs = article.content.split("<p>").filter(Boolean);
+    const quotes = [...article.quotes];
+
+    // Calculate approximately where to put each quote
+    const quotePositions = [];
+    const quotesCount = quotes.length;
+    const paragraphsCount = paragraphs.length;
+
+    // Skip the first few paragraphs (intro) before placing quotes
+    const startParagraph = Math.min(2, Math.floor(paragraphsCount * 0.2));
+
+    if (quotesCount > 0 && paragraphsCount > startParagraph) {
+      // Calculate paragraph spacing for quotes
+      const spacing = Math.floor(
+        (paragraphsCount - startParagraph) / (quotesCount + 1)
+      );
+
+      // Place quotes evenly through the content
+      for (let i = 0; i < quotesCount; i++) {
+        const position = startParagraph + spacing * (i + 1);
+        if (position < paragraphsCount) {
+          quotePositions.push({ index: position, quote: quotes[i] });
+        }
+      }
+    }
+
+    // Render content with quotes inserted at positions
+    return (
+      <>
+        {paragraphs.map((paragraph, index) => {
+          // Check if a quote should be inserted after this paragraph
+          const quoteAtPosition = quotePositions.find(
+            (pos) => pos.index === index
+          );
+
+          return (
+            <React.Fragment key={index}>
+              <p dangerouslySetInnerHTML={{ __html: paragraph }} />
+
+              {quoteAtPosition && (
+                <FeaturedQuote quote={quoteAtPosition.quote} />
+              )}
+            </React.Fragment>
+          );
+        })}
+      </>
+    );
+  };
+
   if (loading) return <Loading>Loading article</Loading>;
 
   if (!article) {
@@ -380,7 +449,7 @@ const ArticleDetail = () => {
         </ShareTools>
       </ArticleMeta>
 
-      <Content dangerouslySetInnerHTML={{ __html: article.content }} />
+      <Content>{renderContentWithQuotes()}</Content>
 
       {/* Citations Section */}
       {article.citations && article.citations.length > 0 && (

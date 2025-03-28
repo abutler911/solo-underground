@@ -8,6 +8,7 @@ import api from "../../utils/api";
 import { adminRequest } from "../../utils/api";
 import EnhancedModal from "../common/EnhancedModal";
 import { useAuth } from "../../context/AuthContext";
+import QuoteEditor from "./QuoteEditor";
 
 const EditorContainer = styled.div`
   max-width: 1000px;
@@ -594,7 +595,7 @@ const ArticleEditor = () => {
     tags: "",
     author: "",
   });
-
+  const [quotes, setQuotes] = useState([]);
   // Array of citation objects
   const [citations, setCitations] = useState([{ title: "", url: "" }]);
 
@@ -624,7 +625,11 @@ const ArticleEditor = () => {
           } else {
             loadedCitations = [{ title: "", url: "" }];
           }
-
+          if (res.data.quotes && Array.isArray(res.data.quotes)) {
+            setQuotes(res.data.quotes);
+          } else {
+            setQuotes([]);
+          }
           setFormData({
             ...res.data,
             tags: res.data.tags ? res.data.tags.join(", ") : "",
@@ -813,6 +818,7 @@ const ArticleEditor = () => {
         published: publish,
         author: formData.author || "Admin",
         citations: validCitations,
+        quotes: quotes.filter((quote) => quote.text.trim() !== ""),
       };
 
       console.log("Submitting article data:", articleData);
@@ -1015,7 +1021,10 @@ const ArticleEditor = () => {
             </CustomQuill>
           </FormGroup>
         </EditorSection>
-
+        <EditorSection>
+          <h2>Featured Quotes</h2>
+          <QuoteEditor quotes={quotes} onChange={setQuotes} />
+        </EditorSection>
         <EditorSection>
           <h2>Citations</h2>
           <CitationsContainer>

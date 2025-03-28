@@ -26,6 +26,23 @@ const ArticleSchema = new mongoose.Schema({
   photoCredit: {
     type: String,
   },
+  // New field for featured quotes
+  quotes: [
+    {
+      text: {
+        type: String,
+        required: true,
+      },
+      attribution: {
+        type: String,
+      },
+      position: {
+        type: String,
+        enum: ["left", "right", "center"],
+        default: "right",
+      },
+    },
+  ],
   tags: [
     {
       type: String,
