@@ -129,4 +129,54 @@ router.delete("/articles/:id", adminAuth, async (req, res) => {
   }
 });
 
+// Get only draft articles for staging
+router.get("/staging", adminAuth, async (req, res) => {
+  try {
+    const drafts = await Article.find({ status: "draft" }).sort({ createdAt: -1 });
+    res.json(drafts);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch drafts" });
+  }
+});
+
+// Publish a draft article
+router.put("/articles/:id/publish", adminAuth, async (req, res) => {
+  try {
+    const updated = await Article.findByIdAndUpdate(
+      req.params.id,
+      {
+        status: "published",
+        published: true,
+        publishedAt: new Date(),
+        updatedAt: new Date(),
+      },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ message: "Article not found" });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: "Error publishing article" });
+  }
+});
+
+// Mark article as needs rewrite
+router.put("/articles/:id/needs-rewrite", adminAuth, async (req, res) => {
+  try {
+    const updated = await Article.findByIdAndUpdate(
+      req.params.id,
+      {
+        status: "needs-rewrite",
+        updatedAt: new Date(),
+      },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ message: "Article not found" });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: "Error updating article status" });
+  }
+});
+
 module.exports = router;

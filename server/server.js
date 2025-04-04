@@ -3,6 +3,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
+const { runJob } = require("./cron/fetchAndRewriteNews");
+
 
 // Import routes
 const articlesRoutes = require("./routes/articles");
@@ -18,13 +20,13 @@ const PORT = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
-      "http://localhost:3000", // For local development
-      "https://solo-underground.netlify.app", // Your Netlify domain
-      "https://solounderground.com", // Your custom domain
-      "https://www.solounderground.com", // www subdomain
+      "http://localhost:3000", 
+      "https://solo-underground.netlify.app", 
+      "https://solounderground.com", 
+      "https://www.solounderground.com", 
     ],
-    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
-    credentials: true, // Allow cookies/auth headers
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true, 
   })
 );
 app.use(express.json());
@@ -64,11 +66,25 @@ app.use((req, res, next) => {
   next();
 });
 
+const { scheduleJobs } = require("./cron/fetchAndRewriteNews");
+scheduleJobs();
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/articles", articlesRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/upload", uploadRoutes);
+
+app.get("/api/test-cron", async (req, res) => {
+  try {
+    await runJob();
+    res.send("Cron job ran successfully.");
+  } catch (err) {
+    console.error("[ERROR] Manual test-cron failed:", err.message);
+    res.status(500).send("Cron job failed.");
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

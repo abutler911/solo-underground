@@ -1,78 +1,47 @@
-// server/models/Article.js
 const mongoose = require("mongoose");
 
-const ArticleSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-  },
-  content: {
-    type: String,
-    required: true,
-  },
-  summary: {
-    type: String,
-  },
-  author: {
-    type: String,
-    default: "Admin",
-  },
-  category: {
-    type: String,
-  },
-  coverImage: {
-    type: String,
-  },
-  photoCredit: {
-    type: String,
-  },
-  // New field for featured quotes
-  quotes: [
-    {
-      text: {
-        type: String,
-        required: true,
+const ArticleSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    original: { type: String }, // ✅ Add this
+    content: { type: String, required: true },
+    summary: { type: String },
+    author: { type: String, default: "Admin" },
+    category: { type: String },
+    coverImage: { type: String },
+    photoCredit: { type: String },
+
+    quotes: [
+      {
+        text: { type: String, required: true },
+        attribution: { type: String },
+        position: {
+          type: String,
+          enum: ["left", "right", "center"],
+          default: "right",
+        },
       },
-      attribution: {
-        type: String,
+    ],
+    tags: [{ type: String }],
+    citations: [
+      {
+        title: { type: String },
+        url: { type: String },
       },
-      position: {
-        type: String,
-        enum: ["left", "right", "center"],
-        default: "right",
-      },
-    },
-  ],
-  tags: [
-    {
+    ],
+    published: { type: Boolean, default: false },
+    publishedAt: { type: Date },
+    status: {
       type: String,
+      enum: ["draft", "published", "needs-rewrite"],
+      default: "draft",
     },
-  ],
-  citations: [
-    {
-      title: {
-        type: String,
-      },
-      url: {
-        type: String,
-      },
-    },
-  ],
-  published: {
-    type: Boolean,
-    default: false,
+    topic: { type: String },
+    sourceUrl: { type: String },
+    reporter: { type: String },
+    voiceId: { type: String },
   },
-  publishedAt: {
-    type: Date,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  { timestamps: true }
+);
 
 module.exports = mongoose.model("Article", ArticleSchema);
