@@ -27,12 +27,14 @@ async function fetchArticles(topic) {
     });
     return res.data.articles || [];
   } catch (err) {
-    console.error(
-      `[ERROR] Fetching articles for topic "${topic}":`,
-      err.message
-    );
+    console.error(`[ERROR] Fetching articles for topic "${topic}":`, err.message);
     return [];
   }
+}
+
+function wordCount(text) {
+  if (!text) return 0;
+  return text.split(/\s+/).filter(Boolean).length;
 }
 
 function randomQuotePosition() {
@@ -41,20 +43,26 @@ function randomQuotePosition() {
 }
 
 async function rewriteArticle(article, reporter) {
+  const topicList = topics.map((t) => `"${t}"`).join(", ");
+
   const prompt = `
 You are ${reporter.name}, a journalist known for being ${reporter.description}.
 
-Rewrite the following article in your unique voice, and return a JSON object with:
-- "rewritten": the full rewritten article
-- "summary": a 30–50 word summary
-- "tags": an array of 3–5 relevant keywords
-- "quotes": an object with "text" and "attribution"
-- "citations": an array of objects with "title" and "url"
-
-Return ONLY the JSON. No commentary or markdown.
+Given the following article, do the following:
+1. Pick the most relevant topic from the list: [${topicList}]
+2. Rewrite the article in your voice.
+3. Return a JSON object with:
+  - rewritten (the full article)
+  - summary (30–50 words)
+  - tags (array of 3–5 keywords)
+  - quotes (object: { text, attribution })
+  - citations (array of { title, url })
+  - topic (chosen from list)
 
 Title: ${article.title}
 Content: ${article.content || article.description || ""}
+
+Return only the JSON. No commentary or markdown.
 `;
 
   try {
@@ -70,10 +78,7 @@ Content: ${article.content || article.description || ""}
     const data = JSON.parse(content);
     return data;
   } catch (err) {
-    console.error(
-      `[ERROR] OpenAI rewrite failed for "${article.title}":`,
-      err.message
-    );
+    console.error(`[ERROR] OpenAI rewrite failed for "${article.title}":`, err.message);
     return null;
   }
 }
@@ -90,7 +95,13 @@ async function runJob() {
       const data = await rewriteArticle(rawArticle, reporter);
 
       if (!data || !data.rewritten || !data.summary) {
-        console.warn(`[SKIP] Incomplete data for "${rawArticle.title}"`);
+        console.warn(`[SKIP] Missing fields for "${rawArticle.title}"`);
+        continue;
+      }
+
+      const wordLength = wordCount(data.rewritten);
+      if (wordLength < 500) {
+        console.warn(`[SKIP] Article too short (${wordLength} words) - "${rawArticle.title}"`);
         continue;
       }
 
@@ -107,14 +118,14 @@ async function runJob() {
           citations: data.citations || [],
           author: reporter.name,
           voiceId: reporter.voiceId,
-          status: "draft",
-          topic,
+          topic: data.topic || topic,
           sourceUrl: rawArticle.url,
+          status: "draft",
           createdAt: new Date(),
         });
 
         console.log(
-          `[CRON] Submitted article by ${reporter.name} on topic "${topic}"`
+          `[CRON] Submitted article by ${reporter.name} on topic "${data.topic || topic}"`
         );
       } catch (err) {
         console.error(`[ERROR] Saving article failed:`, err.message);
@@ -124,7 +135,7 @@ async function runJob() {
 }
 
 function scheduleJobs() {
-  cron.schedule("0 8,18 * * *", runJob); // Runs at 8am and 6pm UTC
+  cron.schedule("0 8,18 * * *", runJob);
   console.log("[CRON] Job scheduled to run at 8am and 6pm UTC");
 }
 
