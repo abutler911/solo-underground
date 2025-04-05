@@ -1,0 +1,246 @@
+The app I want to create I already basically have set up. It is a news feed app in the voice of Cade Vox who comments on articles in snarky and sarcastic tone. The idea is to level up this app to make it an automated news house with Cade Vox being the editor in chief surrounded by a few reporters. The app would automatically go out twice a day and scrape articles in the categories of politics, finance, government, and world events and then one of the ”reporters” would write an article using AI in their voice and then submit the article to a staging area where I as the human user could review it and post it to the news feed. There are a lot of ideas that I want to try and incorporate into this app: 
+This will take setting up a server side cron job to scrape articles, creating Cade’s and other reporters “voices” for the GPT to use to comment and write the article, a staging area, all incorporated into my existing solo underground app that I already have. 
+Hell yeah, Andy—you're building your own underground media machine with a rebel AI reporter and full editorial control. This is exactly the kind of modern twist that makes Solo Underground stand out.
+
+Let’s brainstorm some next-level features and ideas that would make your AI-powered newsroom even more fun, powerful, and unique:
+
+
+---
+
+1. "Cade’s Corner" — Weekly Rants
+
+Cade writes a once-a-week unhinged column:
+
+Pulls multiple news stories together into a big-picture commentary.
+
+Tone: chaotic, sarcastic, sometimes profound.
+
+Can be triggered every Sunday with a cron job and a prompt like:
+
+
+> “What’s the most absurd thing that happened this week, and why does no one care?”
+
+
+
+
+---
+
+2. “Reader Reactions” or “Anonymous Letters”
+
+Let readers submit anonymous feedback or responses to Cade’s posts:
+
+You can filter and publish the best as mini follow-ups.
+
+Style it like classic Letters to the Editor.
+
+Bonus: use GPT to generate fake reader responses in different voices (satirical, outraged, supportive).
+
+
+
+---
+
+3. “Cade Rewrites History”
+
+Give Cade historical events (from Wikipedia, for example) and let him rewrite them in his voice:
+
+Great for evergreen content.
+
+Adds quirky commentary on stuff like Watergate, the moon landing, or the invention of Velcro.
+
+
+
+---
+
+4. “Cade Predicts the Future”
+
+Use AI to generate absurd but oddly plausible “future news” articles.
+
+Think The Onion meets Black Mirror.
+
+Post-dated content that appears in your feed as if it’s from 2027.
+
+You can label it “Underground Forecast” or “Classified Prophecy.”
+
+
+
+---
+
+5. “Behind the Scenes with Cade”
+
+Let users toggle a switch on articles to reveal the original source article, Cade’s raw notes, and maybe a sentence-by-sentence comparison.
+
+Super cool for transparency and style exploration.
+
+Bonus: teach people how the AI’s voice transforms facts.
+
+
+
+---
+
+6. Solo Underground Radio / Audio
+
+Auto-generate audio versions of posts using text-to-speech:
+
+Use tools like ElevenLabs or Google TTS.
+
+Build a playlist of rants and articles people can listen to like a pirate radio stream.
+
+
+
+---
+
+7. Live Feed from Cade’s “Desk”
+
+Like a terminal-style news ticker showing what Cade is working on right now.
+
+“Currently analyzing a secret CIA memo…”
+
+“Scrubbing through 17 conspiracy theories to find the real one…”
+
+Add it as a sidebar component or even as part of the footer.
+
+
+
+---
+
+8. Topic-Driven News Summaries
+
+Let users select categories (e.g., politics, science, weird news) and have Cade curate short, punchy updates for them.
+
+Think Twitter thread-style content.
+
+“3 Things You Should Know (And Be Mad About).”
+
+
+
+---
+
+9. On-Demand Reports
+
+Add a button: “Ask Cade to Report on This”
+
+Users submit a URL or topic.
+
+Cade pulls from that source and writes a Cade-style article.
+
+You can approve and post it, or even set it to auto-publish under a new tag like #FromTheStreets.
+
+
+
+---
+
+10. Solo Underground Vault (Private Collection)
+
+Have a section that’s not public-facing—just for you (or close insiders).
+
+Cade writes raw drafts or sensitive stuff that doesn’t make the public cut.
+
+Maybe show previews on the main feed like:
+
+
+> “This story was too hot for public eyes. It’s in The Vault.”
+
+
+
+
+---
+
+Tech You Can Stack on Later
+
+Webhooks from trending Reddit subs to feed Cade material.
+
+AI image generation for Cade’s “cover photos.”
+
+Gamification: Let users “tip” or “boost” their favorite Cade posts to get him to write follow-ups.
+
+
+
+---
+
+This is way more than a blog now. You’re building an underground publication with its own voice, editorial process, content pipeline, and future monetization potential.
+
+Want me to map out the next few features to build in priority order? Or wireframe that admin “Newsroom” dashboard?
+
+Absolutely, Andy—let’s cut through the chaos and lock in the Top 3 priorities to get your AI-powered Solo Underground newsroom off the ground with momentum and clarity.
+
+
+---
+
+Top 3 Priorities to Start
+
+1. Cade’s Drafting System (Core Automation)
+
+Goal: Automatically fetch articles, rewrite them in Cade’s voice, and store them in MongoDB with status draft.
+
+Why it matters: This is the heart of your AI newsroom. If Cade doesn’t file stories, there’s no content. Start here to build your content engine.
+
+Key Tasks:
+
+Set up node-cron or a manual trigger to fetch news via RSS.
+
+Use OpenAI to rewrite articles in Cade’s voice.
+
+Store them as draft in your Article model.
+
+(Optional now) Log source URL and time of submission.
+
+
+
+---
+
+2. Editor Dashboard (Staging + Publishing Flow)
+
+Goal: Give yourself a clean /admin/staging page to review Cade’s drafts and publish with a click.
+
+Why it matters: You’re the editor/publisher. This is how you turn raw AI content into polished posts ready for the feed.
+
+Key Tasks:
+
+Create a route/controller to view all draft articles.
+
+Add preview, edit (optional), and publish buttons.
+
+On publish, update status to published, update publishedAt.
+
+
+Stretch Features (optional but useful):
+
+Add filter by tag or date
+
+Add “Delete” or “Needs Rewrite” button
+
+
+
+---
+
+3. Public Feed Display (Published Content Only)
+
+Goal: Show only published articles on your main Solo Underground feed (homepage or /articles).
+
+Why it matters: Once articles are being published, you need a place users can read them—this is your public face.
+
+Key Tasks:
+
+Update frontend to only fetch and show status: 'published' articles.
+
+Sort by publishedAt DESC.
+
+Add author tag “By Cade Vox” and maybe link to source if saved.
+
+Style each post with Cade’s unique flair (bold headers, edgy pull quotes, maybe even a “Filed by Cade” label).
+
+
+
+---
+
+Quick Roadmap After That
+
+Once you have the above system:
+
+4. Add Article Scheduling
+
+5. Add “Cade’s Corner” Weekly Rant
+
+6. Add user reactions or feedback (“Letters to the Editor”)
+
+7. Add tones/categories to Cade’s rewrites

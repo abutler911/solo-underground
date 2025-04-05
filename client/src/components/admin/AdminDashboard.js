@@ -668,6 +668,33 @@ const AdminDashboard = () => {
               </svg>
               New Article
             </ActionButton>
+            <ActionButton to="/admin/staging">
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M4 6H20M4 10H20M4 14H14M4 18H14"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <rect
+      x="2"
+      y="4"
+      width="20"
+      height="16"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
+  </svg>
+  Staging Area
+</ActionButton>
+
+
             <LogoutButton onClick={initiateLogout}>
               <svg
                 viewBox="0 0 24 24"

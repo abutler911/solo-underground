@@ -14,6 +14,8 @@ import ArticleDetail from "./components/ArticleDetail";
 import AdminLogin from "./components/admin/AdminLogin";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import ArticleEditor from "./components/admin/ArticleEditor";
+import AdminStaging from "./components/admin/AdminStaging";
+
 import SiteLoginPage from "./components/SiteLoginPage.js";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import GlobalStyles from "./styles/GlobalStyles";
@@ -257,6 +259,16 @@ function App() {
               </AdminRoute>
             }
           />
+
+          <Route
+            path="/admin/staging"
+            element={
+              <AdminRoute>
+                <AdminStaging />
+              </AdminRoute>
+            }
+          />
+
 
           {/* Catch-all route - redirect to home if authenticated or login if not */}
           <Route
