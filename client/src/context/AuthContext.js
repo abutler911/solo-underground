@@ -1,5 +1,6 @@
 // client/src/context/AuthContext.js
 import React, { createContext, useState, useContext, useEffect } from "react";
+import jwtDecode from "jwt-decode";
 import api, { authApi } from "../utils/api";
 
 const AuthContext = createContext();
@@ -7,7 +8,6 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  // Two separate auth states for site access and admin access
   const [isSiteAuthenticated, setIsSiteAuthenticated] = useState(false);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -15,29 +15,40 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      // Check site access first
       const siteToken = localStorage.getItem("site_token");
+      const adminToken = localStorage.getItem("admin_token");
+
+      // --- Check Site Auth ---
       if (siteToken) {
         try {
-          // Set default headers for all future requests
+          // Optional: decode and check site token expiration
+          // const { exp } = jwtDecode(siteToken);
+          // if (Date.now() >= exp * 1000) throw new Error("Site token expired");
+
           api.defaults.headers.common["Authorization"] = `Bearer ${siteToken}`;
           setIsSiteAuthenticated(true);
         } catch (err) {
+          console.warn("Site token invalid or expired");
           localStorage.removeItem("site_token");
           setIsSiteAuthenticated(false);
         }
       }
 
-      // Then check admin access if needed
-      const adminToken = localStorage.getItem("admin_token");
+      // --- Check Admin Auth ---
       if (adminToken) {
         try {
-          // Use the authApi helper for admin verification
+          // Optional: decode and check admin token expiration
+          // const { exp } = jwtDecode(adminToken);
+          // if (Date.now() >= exp * 1000) throw new Error("Admin token expired");
+
+          api.defaults.headers.common["Authorization"] = `Bearer ${adminToken}`;
           await authApi.admin.verify();
           setIsAdminAuthenticated(true);
         } catch (err) {
+          console.warn("Admin token invalid or expired");
           localStorage.removeItem("admin_token");
           setIsAdminAuthenticated(false);
+          setError("Admin session expired. Please log in again.");
         }
       }
 
@@ -47,16 +58,14 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Site login function using the authApi
+  // ---- Site Login ----
   const siteLogin = async (password) => {
     setError("");
     try {
       const res = await authApi.site.login(password);
       localStorage.setItem("site_token", res.data.token);
 
-      // Set default headers for all future requests
       api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
-
       setIsSiteAuthenticated(true);
       return true;
     } catch (err) {
@@ -66,16 +75,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Admin login function using the authApi
+  // ---- Admin Login ----
   const adminLogin = async (username, password) => {
     setError("");
     try {
       const res = await authApi.admin.login(username, password);
-
-      // Store the admin token
       localStorage.setItem("admin_token", res.data.token);
-      setIsAdminAuthenticated(true);
 
+      api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
+      setIsAdminAuthenticated(true);
       return true;
     } catch (err) {
       console.error("Admin login error:", err);
@@ -84,7 +92,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout function
+  // ---- Logout (site, admin, or both) ----
   const logout = (type = "both") => {
     if (type === "site" || type === "both") {
       localStorage.removeItem("site_token");
@@ -96,22 +104,15 @@ export const AuthProvider = ({ children }) => {
       setIsAdminAuthenticated(false);
     }
 
-    // If logging out of site, also log out of admin
-    if (type === "site") {
-      localStorage.removeItem("admin_token");
-      setIsAdminAuthenticated(false);
-    }
+    // Clean fallback
+    delete api.defaults.headers.common["Authorization"];
   };
-
-  // Combined authentication status
-  const isAuthenticated = isSiteAuthenticated;
-  const isAdmin = isAdminAuthenticated;
 
   return (
     <AuthContext.Provider
       value={{
-        isAuthenticated,
-        isAdmin,
+        isAuthenticated: isSiteAuthenticated,
+        isAdmin: isAdminAuthenticated,
         loading,
         error,
         siteLogin,
