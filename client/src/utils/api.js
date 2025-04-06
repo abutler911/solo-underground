@@ -8,31 +8,43 @@ const api = axios.create({
 // Add token to all requests
 api.interceptors.request.use(
   (config) => {
-    const token =
-      localStorage.getItem("token") || localStorage.getItem("site_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const siteToken = localStorage.getItem("site_token");
+    const adminToken = localStorage.getItem("admin_token");
+
+    // Give priority to adminToken
+    if (adminToken) {
+      config.headers.Authorization = `Bearer ${adminToken}`;
+    } else if (siteToken) {
+      config.headers.Authorization = `Bearer ${siteToken}`;
     }
+
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Admin API request helper
 const adminRequest = async (method, url, data = null) => {
   const adminToken = localStorage.getItem("admin_token");
+
   if (!adminToken) {
+    console.error("Admin token missing. Cannot proceed.");
     throw new Error("Admin authentication required");
   }
+
+  const config = {
+    headers: {
+      Authorization: `Bearer ${adminToken}`,
+    },
+  };
+
+  console.log(`🔐 Using token: ${adminToken.slice(0, 10)}...`);
+  console.log(
+    `📡 Making ${method.toUpperCase()} request to ${url}`,
+    data || ""
+  );
+
   try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${adminToken}`,
-      },
-    };
-    console.log(`Making ${method.toUpperCase()} request to ${url}:`, data);
     let response;
     if (method.toLowerCase() === "get") {
       response = await api.get(url, config);
@@ -42,11 +54,14 @@ const adminRequest = async (method, url, data = null) => {
       response = await api.put(url, data, config);
     } else if (method.toLowerCase() === "delete") {
       response = await api.delete(url, config);
+    } else {
+      throw new Error(`Unsupported method: ${method}`);
     }
-    console.log(`Response from ${method.toUpperCase()} ${url}:`, response.data);
+
+    console.log("✅ Admin response:", response.data);
     return response;
   } catch (error) {
-    console.error(`Admin API error (${method} ${url}):`, error);
+    console.error(`❌ Admin API error (${method} ${url}):`, error);
     throw error;
   }
 };

@@ -80,9 +80,16 @@ export const AuthProvider = ({ children }) => {
     setError("");
     try {
       const res = await authApi.admin.login(username, password);
+
+      // ✅ Debug the token
+      console.log("Received admin token:", res.data.token);
+
+      // ✅ Save token to localStorage
       localStorage.setItem("admin_token", res.data.token);
 
+      // ✅ Set the default header for future Axios requests
       api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
+
       setIsAdminAuthenticated(true);
       return true;
     } catch (err) {
