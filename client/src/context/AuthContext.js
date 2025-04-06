@@ -1,7 +1,6 @@
 // client/src/context/AuthContext.js
 import React, { createContext, useState, useContext, useEffect } from "react";
-
-import api from "../utils/api";
+import api, { authApi } from "../utils/api";
 
 const AuthContext = createContext();
 
@@ -33,16 +32,8 @@ export const AuthProvider = ({ children }) => {
       const adminToken = localStorage.getItem("admin_token");
       if (adminToken) {
         try {
-          // Temporarily replace the authorization header
-          const currentSiteToken = api.defaults.headers.common["Authorization"];
-          api.defaults.headers.common["Authorization"] = `Bearer ${adminToken}`;
-
-          // Verify admin token
-          await api.get("/api/admin/verify");
-
-          // Restore the site token
-          api.defaults.headers.common["Authorization"] = currentSiteToken;
-
+          // Use the authApi helper for admin verification
+          await authApi.admin.verify();
           setIsAdminAuthenticated(true);
         } catch (err) {
           localStorage.removeItem("admin_token");
@@ -56,11 +47,11 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Site login function
+  // Site login function using the authApi
   const siteLogin = async (password) => {
     setError("");
     try {
-      const res = await api.post("/api/auth/site-access", { password });
+      const res = await authApi.site.login(password);
       localStorage.setItem("site_token", res.data.token);
 
       // Set default headers for all future requests
@@ -75,15 +66,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Admin login function using the authApi
   const adminLogin = async (username, password) => {
     setError("");
     try {
-      // Important: Don't use the default authorization header for login requests
-      const res = await api.post(
-        "/api/admin/login",
-        { username, password },
-        { headers: { Authorization: "" } } // Explicitly clear the Authorization header
-      );
+      const res = await authApi.admin.login(username, password);
 
       // Store the admin token
       localStorage.setItem("admin_token", res.data.token);

@@ -1,46 +1,59 @@
-// server/routes/admin.js
-const express = require("express");
-const router = express.Router();
+// server/controllers/articleController.js
 const Article = require("../models/Article");
-const { adminAuth } = require("../middleware/auth");
+
+// Get all published articles for public consumption
+exports.getPublishedArticles = async (req, res) => {
+  try {
+    const articles = await Article.find({ published: true }).sort({
+      publishedAt: -1,
+    });
+    res.json(articles);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 // Get all articles (for admin, including drafts)
-router.get("/articles", adminAuth, async (req, res) => {
+exports.getAllArticles = async (req, res) => {
   try {
     const articles = await Article.find().sort({ updatedAt: -1 });
     res.json(articles);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
-});
+};
 
 // Get single article by ID
-router.get("/articles/:id", adminAuth, async (req, res) => {
+exports.getArticleById = async (req, res) => {
   try {
     const article = await Article.findById(req.params.id);
-    if (!article) return res.status(404).json({ message: "Article not found" });
+    if (!article) {
+      return res.status(404).json({ message: "Article not found" });
+    }
     res.json(article);
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: err.message });
   }
-});
+};
 
-// Create article
-router.post("/articles", adminAuth, async (req, res) => {
+// Create new article
+exports.createArticle = async (req, res) => {
   try {
-    const article = new Article({
+    const articleData = {
       ...req.body,
       publishedAt: req.body.published ? Date.now() : null,
-    });
+    };
+
+    const article = new Article(articleData);
     const savedArticle = await article.save();
     res.status(201).json(savedArticle);
   } catch (err) {
-    res.status(400).json({ message: "Error creating article" });
+    res.status(400).json({ message: err.message });
   }
-});
+};
 
 // Update article
-router.put("/articles/:id", adminAuth, async (req, res) => {
+exports.updateArticle = async (req, res) => {
   try {
     const updates = { ...req.body };
 
@@ -55,29 +68,33 @@ router.put("/articles/:id", adminAuth, async (req, res) => {
       new: true,
     });
 
-    if (!article) return res.status(404).json({ message: "Article not found" });
+    if (!article) {
+      return res.status(404).json({ message: "Article not found" });
+    }
 
     res.json(article);
   } catch (err) {
-    res.status(400).json({ message: "Error updating article" });
+    res.status(400).json({ message: err.message });
   }
-});
+};
 
 // Delete article
-router.delete("/articles/:id", adminAuth, async (req, res) => {
+exports.deleteArticle = async (req, res) => {
   try {
     const article = await Article.findByIdAndDelete(req.params.id);
 
-    if (!article) return res.status(404).json({ message: "Article not found" });
+    if (!article) {
+      return res.status(404).json({ message: "Article not found" });
+    }
 
     res.json({ message: "Article deleted" });
   } catch (err) {
-    res.status(500).json({ message: "Error deleting article" });
+    res.status(500).json({ message: err.message });
   }
-});
+};
 
-// Get only draft articles for staging
-router.get("/staging", adminAuth, async (req, res) => {
+// Get draft articles for staging
+exports.getDraftArticles = async (req, res) => {
   try {
     const drafts = await Article.find({ status: "draft" }).sort({
       createdAt: -1,
@@ -86,10 +103,10 @@ router.get("/staging", adminAuth, async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch drafts" });
   }
-});
+};
 
 // Publish a draft article
-router.put("/articles/:id/publish", adminAuth, async (req, res) => {
+exports.publishArticle = async (req, res) => {
   try {
     const updated = await Article.findByIdAndUpdate(
       req.params.id,
@@ -102,15 +119,18 @@ router.put("/articles/:id/publish", adminAuth, async (req, res) => {
       { new: true }
     );
 
-    if (!updated) return res.status(404).json({ message: "Article not found" });
+    if (!updated) {
+      return res.status(404).json({ message: "Article not found" });
+    }
+
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: "Error publishing article" });
   }
-});
+};
 
 // Mark article as needs rewrite
-router.put("/articles/:id/needs-rewrite", adminAuth, async (req, res) => {
+exports.markForRewrite = async (req, res) => {
   try {
     const updated = await Article.findByIdAndUpdate(
       req.params.id,
@@ -121,11 +141,12 @@ router.put("/articles/:id/needs-rewrite", adminAuth, async (req, res) => {
       { new: true }
     );
 
-    if (!updated) return res.status(404).json({ message: "Article not found" });
+    if (!updated) {
+      return res.status(404).json({ message: "Article not found" });
+    }
+
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: "Error updating article status" });
   }
-});
-
-module.exports = router;
+};

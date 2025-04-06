@@ -5,7 +5,6 @@ const cors = require("cors");
 require("dotenv").config();
 const { runJob } = require("./cron/fetchAndRewriteNews");
 
-
 // Import routes
 const articlesRoutes = require("./routes/articles");
 const adminRoutes = require("./routes/admin");
@@ -20,13 +19,13 @@ const PORT = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
-      "http://localhost:3000", 
-      "https://solo-underground.netlify.app", 
-      "https://solounderground.com", 
-      "https://www.solounderground.com", 
+      "http://localhost:3000",
+      "https://solo-underground.netlify.app",
+      "https://solounderground.com",
+      "https://www.solounderground.com",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true, 
+    credentials: true,
   })
 );
 app.use(express.json());
@@ -70,9 +69,9 @@ const { scheduleJobs } = require("./cron/fetchAndRewriteNews");
 scheduleJobs();
 
 // Routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes); // This now includes both site and admin auth routes
 app.use("/api/articles", articlesRoutes);
-app.use("/api/admin", adminRoutes);
+app.use("/api/admin", adminRoutes); // This no longer includes admin auth routes
 app.use("/api/upload", uploadRoutes);
 
 app.get("/api/test-cron", async (req, res) => {
@@ -84,7 +83,6 @@ app.get("/api/test-cron", async (req, res) => {
     res.status(500).send("Cron job failed.");
   }
 });
-
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../../context/AuthContext";
 
+// All styled components remain the same...
 const LoginContainer = styled.div`
   display: flex;
   justify-content: center;

@@ -4,8 +4,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import styled from "styled-components";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import api from "../../utils/api";
-import { adminRequest } from "../../utils/api";
+import { api, articlesApi } from "../../utils/api";
 import EnhancedModal from "../common/EnhancedModal";
 import { useAuth } from "../../context/AuthContext";
 import QuoteEditor from "./QuoteEditor";
@@ -616,29 +615,42 @@ const ArticleEditor = () => {
     if (isEditing) {
       const fetchArticle = async () => {
         try {
-          const res = await adminRequest("get", `/api/admin/articles/${id}`);
+          console.log(`Fetching article with ID: ${id}`);
+          const res = await articlesApi.admin.getById(id);
+          console.log("Article data received:", res.data);
 
-          // Extract any existing citations from the article data
-          let loadedCitations = [];
-          if (res.data.citations && Array.isArray(res.data.citations)) {
-            loadedCitations = res.data.citations;
-          } else {
-            loadedCitations = [{ title: "", url: "" }];
-          }
-          if (res.data.quotes && Array.isArray(res.data.quotes)) {
-            setQuotes(res.data.quotes);
-          } else {
-            setQuotes([]);
-          }
+          // Create a more explicit mapping to ensure all fields are correctly set
+          const articleData = res.data;
+
           setFormData({
-            ...res.data,
-            tags: res.data.tags ? res.data.tags.join(", ") : "",
-            author: res.data.author || "",
+            title: articleData.title || "",
+            category: articleData.category || "",
+            summary: articleData.summary || "",
+            content: articleData.content || "",
+            coverImage: articleData.coverImage || "",
+            photoCredit: articleData.photoCredit || "",
+            tags: articleData.tags ? articleData.tags.join(", ") : "",
+            author: articleData.author || "",
           });
 
-          setCitations(loadedCitations);
+          // Handle quotes and citations separately
+          if (articleData.quotes && Array.isArray(articleData.quotes)) {
+            console.log("Setting quotes:", articleData.quotes);
+            setQuotes(articleData.quotes);
+          } else {
+            console.log("No quotes found, using empty array");
+            setQuotes([]);
+          }
+
+          if (articleData.citations && Array.isArray(articleData.citations)) {
+            console.log("Setting citations:", articleData.citations);
+            setCitations(articleData.citations);
+          } else {
+            console.log("No citations found, using default");
+            setCitations([{ title: "", url: "" }]);
+          }
         } catch (err) {
-          console.error("Error fetching article", err);
+          console.error("Error fetching article:", err);
 
           // Handle authentication errors
           if (err.response && err.response.status === 401) {
@@ -717,25 +729,15 @@ const ArticleEditor = () => {
     setImageUploading(true);
 
     try {
-      // Get the admin token
-      const adminToken = localStorage.getItem("admin_token");
-
-      if (!adminToken) {
-        setErrorMessage("Admin authentication required");
-        setShowErrorModal(true);
-        setImageUploading(false);
-        return;
-      }
-
       // Create FormData for the file
       const formDataObj = new FormData();
       formDataObj.append("image", file);
 
-      // Send to server with proper admin token in header
+      // Send to server using our admin token handling
       const response = await api.post("/api/upload/image", formDataObj, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${adminToken}`,
+          Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
         },
       });
 
@@ -824,9 +826,9 @@ const ArticleEditor = () => {
       console.log("Submitting article data:", articleData);
 
       if (isEditing) {
-        await adminRequest("put", `/api/admin/articles/${id}`, articleData);
+        await articlesApi.admin.update(id, articleData);
       } else {
-        await adminRequest("post", "/api/admin/articles", articleData);
+        await articlesApi.admin.create(articleData);
       }
 
       // Show success modal
