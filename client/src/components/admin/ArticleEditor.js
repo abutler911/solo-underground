@@ -617,10 +617,18 @@ const ArticleEditor = () => {
         try {
           console.log(`Fetching article with ID: ${id}`);
           const res = await articlesApi.admin.getById(id);
-          console.log("Article data received:", res.data);
+          console.log("FULL RESPONSE:", res); // logs status, headers, etc.
+          console.log("DATA SHAPE:", res.data); // logs the actual response body
 
           // Create a more explicit mapping to ensure all fields are correctly set
           const articleData = res.data;
+
+          console.log("Parsed article data fields:", {
+            title: articleData.title,
+            category: articleData.category,
+            tags: articleData.tags,
+            author: articleData.author,
+          });
 
           setFormData({
             title: articleData.title || "",
