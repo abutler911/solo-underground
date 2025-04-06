@@ -601,6 +601,7 @@ const ArticleEditor = () => {
   const [saving, setSaving] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
   const [publishPending, setPublishPending] = useState(false);
+  const [loading, setLoading] = useState(isEditing); // Only load if editing
 
   const categories = [
     "Politics",
@@ -615,20 +616,8 @@ const ArticleEditor = () => {
     if (isEditing) {
       const fetchArticle = async () => {
         try {
-          console.log(`Fetching article with ID: ${id}`);
           const res = await articlesApi.admin.getById(id);
-          console.log("FULL RESPONSE:", res); // logs status, headers, etc.
-          console.log("DATA SHAPE:", res.data); // logs the actual response body
-
-          // Create a more explicit mapping to ensure all fields are correctly set
           const articleData = res.data;
-
-          console.log("Parsed article data fields:", {
-            title: articleData.title,
-            category: articleData.category,
-            tags: articleData.tags,
-            author: articleData.author,
-          });
 
           setFormData({
             title: articleData.title || "",
@@ -641,45 +630,22 @@ const ArticleEditor = () => {
             author: articleData.author || "",
           });
 
-          // Handle quotes and citations separately
-          if (articleData.quotes && Array.isArray(articleData.quotes)) {
-            console.log("Setting quotes:", articleData.quotes);
-            setQuotes(articleData.quotes);
-          } else {
-            console.log("No quotes found, using empty array");
-            setQuotes([]);
-          }
-
-          if (articleData.citations && Array.isArray(articleData.citations)) {
-            console.log("Setting citations:", articleData.citations);
-            setCitations(articleData.citations);
-          } else {
-            console.log("No citations found, using default");
-            setCitations([{ title: "", url: "" }]);
-          }
+          setQuotes(articleData.quotes || []);
+          setCitations(articleData.citations || [{ title: "", url: "" }]);
         } catch (err) {
           console.error("Error fetching article:", err);
-
-          // Handle authentication errors
-          if (err.response && err.response.status === 401) {
-            setErrorMessage(
-              "Your admin session has expired. Please log in again."
-            );
-            setShowErrorModal(true);
-          } else {
-            setErrorMessage(
-              "Failed to load article: " +
-                (err.response?.data?.message || "Unknown error")
-            );
-            setShowErrorModal(true);
-          }
+          setErrorMessage("Failed to load article.");
+          setShowErrorModal(true);
+        } finally {
+          setLoading(false); // ✅ Form is ready
         }
       };
 
       fetchArticle();
+    } else {
+      setLoading(false); // Not editing, skip loading
     }
 
-    // Scroll to top when component mounts
     window.scrollTo(0, 0);
   }, [id, isEditing]);
 
@@ -879,7 +845,16 @@ const ArticleEditor = () => {
       navigate("/admin/login");
     }
   };
-
+  if (loading) {
+    return (
+      <LoadingOverlay $active={true}>
+        <LoadingContent>
+          <LoadingSpinner />
+          <LoadingText>Loading article...</LoadingText>
+        </LoadingContent>
+      </LoadingOverlay>
+    );
+  }
   return (
     <EditorContainer>
       <EditorHeader>
