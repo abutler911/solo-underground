@@ -59,14 +59,6 @@ const FormContainer = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.1);
 `;
 
-const Description = styled.div`
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 2rem;
-  text-align: center;
-  font-size: 0.95rem;
-  line-height: 1.6;
-`;
-
 const Form = styled.form`
   display: flex;
   flex-direction: column;
@@ -155,7 +147,7 @@ const SiteLoginPage = () => {
   const { siteLogin, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const [typedText, setTypedText] = useState("");
+  const [setTypedText] = useState("");
   const terminalText = "> initializing access protocol_...";
   const typingSpeed = 120;
 
@@ -235,38 +227,5 @@ const SiteLoginPage = () => {
     </LoginContainer>
   );
 };
-
-const TerminalLine = styled.pre`
-  font-family: "Courier New", Courier, monospace;
-  color: #00ff00;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-  white-space: pre-wrap;
-  display: inline-block;
-
-  &:after {
-    content: "█";
-    margin-left: 2px;
-    animation: blink 1s step-start infinite;
-  }
-
-  @keyframes blink {
-    50% {
-      opacity: 0;
-    }
-  }
-`;
-
-const AccessLabel = styled.strong`
-  color: #ff7e5f;
-  font-size: 1rem;
-  display: block;
-`;
-
-const Quote = styled.em`
-  color: #aaa;
-  display: block;
-  margin-top: 1.5rem;
-`;
 
 export default SiteLoginPage;
