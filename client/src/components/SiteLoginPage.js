@@ -154,6 +154,21 @@ const SiteLoginPage = () => {
   const { siteLogin, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
+  const [typedText, setTypedText] = useState("");
+  const terminalText = "> initializing access protocol_...";
+
+  useEffect(() => {
+    let i = 0;
+    const speed = 40; // ms per character
+    const interval = setInterval(() => {
+      setTypedText(terminalText.slice(0, i + 1));
+      i++;
+      if (i >= terminalText.length) clearInterval(interval);
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
@@ -191,7 +206,7 @@ const SiteLoginPage = () => {
 
       <FormContainer>
         <Description>
-          <TerminalLine>{`> initializing access protocol_...`}</TerminalLine>
+          <TerminalLine>{typedText}</TerminalLine>
           <AccessLabel>Encrypted Access Required</AccessLabel>
           <p style={{ marginTop: "1rem" }}>
             This portal is restricted. Only authorized individuals with the
@@ -233,6 +248,7 @@ const TerminalLine = styled.pre`
   color: #999;
   font-size: 0.875rem;
   margin-bottom: 1rem;
+  white-space: pre-wrap;
 `;
 
 const AccessLabel = styled.strong`
