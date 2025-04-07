@@ -18,9 +18,8 @@ const Line = styled.div`
 `;
 
 const Cursor = styled.span`
-  margin-left: 5px;
+  display: inline-block;
   animation: blink 1s step-start infinite;
-
   @keyframes blink {
     50% {
       opacity: 0;
@@ -39,6 +38,7 @@ const TerminalBootText = () => {
   const [lines, setLines] = useState([]);
   const [charIndex, setCharIndex] = useState(0);
   const [lineIndex, setLineIndex] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
     if (lineIndex < bootLines.length) {
@@ -54,17 +54,24 @@ const TerminalBootText = () => {
         setLineIndex((prev) => prev + 1);
         setCharIndex(0);
       }
+    } else {
+      setIsComplete(true);
     }
   }, [charIndex, lineIndex, lines]);
 
   return (
     <Terminal>
-      {lines.map((line, idx) => (
-        <Line key={idx}>
-          <span>{line}</span>
-          {idx === lines.length - 1 && <Cursor>█</Cursor>}
-        </Line>
-      ))}
+      {bootLines.map((_, idx) => {
+        const isTyping = idx === lineIndex && lineIndex < bootLines.length;
+        const lineText = lines[idx] || "";
+        return (
+          <div key={idx}>
+            {lineText}
+            {isTyping && <Cursor>█</Cursor>}
+            {idx === bootLines.length - 1 && isComplete && <Cursor>█</Cursor>}
+          </div>
+        );
+      })}
     </Terminal>
   );
 };
