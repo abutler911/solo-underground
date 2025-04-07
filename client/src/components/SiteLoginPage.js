@@ -156,15 +156,15 @@ const SiteLoginPage = () => {
 
   const [typedText, setTypedText] = useState("");
   const terminalText = "> initializing access protocol_...";
+  const typingSpeed = 120;
 
   useEffect(() => {
     let i = 0;
-    const speed = 40; // ms per character
     const interval = setInterval(() => {
       setTypedText(terminalText.slice(0, i + 1));
       i++;
       if (i >= terminalText.length) clearInterval(interval);
-    }, speed);
+    }, typingSpeed);
 
     return () => clearInterval(interval);
   }, []);
@@ -207,12 +207,16 @@ const SiteLoginPage = () => {
       <FormContainer>
         <Description>
           <TerminalLine>{typedText}</TerminalLine>
-          <AccessLabel>Encrypted Access Required</AccessLabel>
+          <strong style={{ color: "#ff7e5f", fontSize: "1rem" }}>
+            Encrypted Access Required
+          </strong>
           <p style={{ marginTop: "1rem" }}>
             This portal is restricted. Only authorized individuals with the
             passphrase may proceed.
           </p>
-          <Quote>“The truth lies beneath the surface.”</Quote>
+          <em style={{ color: "#aaa", display: "block", marginTop: "1.5rem" }}>
+            “The truth lies beneath the surface.”
+          </em>
         </Description>
 
         <Form onSubmit={handleSubmit}>
@@ -245,10 +249,23 @@ const SiteLoginPage = () => {
 
 const TerminalLine = styled.pre`
   font-family: "Courier New", Courier, monospace;
-  color: #999;
-  font-size: 0.875rem;
+  color: #00ff00;
+  font-size: 0.9rem;
   margin-bottom: 1rem;
   white-space: pre-wrap;
+  display: inline-block;
+
+  &:after {
+    content: "█";
+    margin-left: 2px;
+    animation: blink 1s step-start infinite;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
 `;
 
 const AccessLabel = styled.strong`
