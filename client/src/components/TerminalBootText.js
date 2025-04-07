@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import styled, { keyframes } from "styled-components";
+import styled from "styled-components";
 
 const Terminal = styled.pre`
   font-family: "Courier New", Courier, monospace;
@@ -12,22 +12,9 @@ const Terminal = styled.pre`
   overflow-y: auto;
 `;
 
-const glitch = keyframes`
-  0% { opacity: 1; transform: translate(0); }
-  20% { opacity: 0.8; transform: translate(-1px, 1px); }
-  40% { opacity: 1; transform: translate(1px, -1px); }
-  60% { opacity: 0.7; transform: translate(-1px, -1px); }
-  80% { opacity: 1; transform: translate(1px, 1px); }
-  100% { opacity: 1; transform: translate(0); }
-`;
-
 const Line = styled.div`
   display: flex;
   align-items: center;
-
-  &:last-child span {
-    animation: ${glitch} 0.9s linear infinite;
-  }
 `;
 
 const Cursor = styled.span`
@@ -58,10 +45,10 @@ const TerminalBootText = () => {
       const currentLine = bootLines[lineIndex];
       if (charIndex < currentLine.length) {
         const timeout = setTimeout(() => {
-          const newLine = (lines[lineIndex] || "") + currentLine[charIndex];
-          setLines((prev) => [...prev.slice(0, lineIndex), newLine]);
+          const updatedLine = (lines[lineIndex] || "") + currentLine[charIndex];
+          setLines((prev) => [...prev.slice(0, lineIndex), updatedLine]);
           setCharIndex((prev) => prev + 1);
-        }, 80); // slower character reveal
+        }, 80);
         return () => clearTimeout(timeout);
       } else {
         setLineIndex((prev) => prev + 1);

@@ -1,9 +1,28 @@
 // client/src/components/SiteLoginPage.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../context/AuthContext";
 import TerminalBootText from "./TerminalBootText";
+
+// === Random quote config ===
+const cyberQuotes = [
+  "“Access is a privilege, not a right.”",
+  "“The system is watching. Are you watching back?”",
+  "Tip: Use `sudo` only if you understand the consequences.",
+  "Tip: Encryption is not paranoia. It's protocol.",
+  "“He who controls the logs, controls the truth.”",
+  "“In a time of universal deceit, telling the truth is a revolutionary act.”",
+];
+
+// === Styled Component for the quote ===
+const RandomQuote = styled.p`
+  color: #00ff00;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.8rem;
+  text-align: center;
+  margin-top: 1rem;
+`;
 
 const LoginContainer = styled.div`
   min-height: 100vh;
@@ -147,22 +166,11 @@ const SiteLoginPage = () => {
   const { siteLogin, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const [setTypedText] = useState("");
-  const terminalText = "> initializing access protocol_...";
-  const typingSpeed = 120;
-
-  useEffect(() => {
-    let i = 0;
-    const interval = setInterval(() => {
-      setTypedText(terminalText.slice(0, i + 1));
-      i++;
-      if (i >= terminalText.length) clearInterval(interval);
-    }, typingSpeed);
-
-    return () => clearInterval(interval);
+  const randomQuote = useMemo(() => {
+    const index = Math.floor(Math.random() * cyberQuotes.length);
+    return cyberQuotes[index];
   }, []);
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/");
@@ -176,7 +184,6 @@ const SiteLoginPage = () => {
 
     try {
       const success = await siteLogin(password);
-
       if (success) {
         navigate("/");
       } else {
@@ -199,6 +206,7 @@ const SiteLoginPage = () => {
 
       <FormContainer>
         <TerminalBootText />
+        <RandomQuote>{randomQuote}</RandomQuote>
 
         <Form onSubmit={handleSubmit}>
           <FormGroup>
