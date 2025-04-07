@@ -1,6 +1,11 @@
-// client/src/components/TerminalBootText.js
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
+
+const blink = keyframes`
+  50% {
+    opacity: 0;
+  }
+`;
 
 const Terminal = styled.pre`
   font-family: "Courier New", Courier, monospace;
@@ -9,19 +14,24 @@ const Terminal = styled.pre`
   background-color: transparent;
   white-space: pre-wrap;
   line-height: 1.4;
-  max-height: 300px;
+  max-height: 280px;
   overflow-y: auto;
+  padding-bottom: 0.5rem;
+
+  &:after {
+    content: "█";
+    margin-left: 2px;
+    animation: ${blink} 1s step-start infinite;
+  }
 `;
 
 const bootLines = [
-  "> boot sequence initialized",
-  "> verifying biometric patterns...",
-  "> connection established: 127.0.0.1",
-  "> loading underground modules...",
-  "> decrypting source stream...",
-  "> establishing journalist uplink...",
-  "> status: ⚠ unauthorized access",
-  "> prompt for site passphrase...",
+  "> boot sequence initialized...",
+  "> verifying biometric hash...",
+  "> uplink to node.404.established",
+  "> loading modules [REDACTED]",
+  "> decrypting intel stream...",
+  "> access warning: surveillance detected",
 ];
 
 const TerminalBootText = () => {
@@ -36,12 +46,15 @@ const TerminalBootText = () => {
         const timeout = setTimeout(() => {
           setOutput((prev) => prev + currentLine[charIndex]);
           setCharIndex((prev) => prev + 1);
-        }, 60); // slower typing
+        }, 75); // slower, terminal-like feel
         return () => clearTimeout(timeout);
       } else {
-        setOutput((prev) => prev + "\n");
-        setLineIndex((prev) => prev + 1);
-        setCharIndex(0);
+        const timeout = setTimeout(() => {
+          setOutput((prev) => prev + "\n");
+          setLineIndex((prev) => prev + 1);
+          setCharIndex(0);
+        }, 300); // slight delay between lines
+        return () => clearTimeout(timeout);
       }
     }
   }, [lineIndex, charIndex]);
