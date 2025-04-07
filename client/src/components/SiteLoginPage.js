@@ -5,6 +5,39 @@ import styled from "styled-components";
 import { useAuth } from "../context/AuthContext";
 import TerminalBootText from "./TerminalBootText";
 
+const FingerprintSensor = styled.button`
+  background: none;
+  border: 2px solid #00ff00;
+  border-radius: 50%;
+  padding: 1.2rem;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 0 10px #00ff00;
+  position: relative;
+
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px #00ff00;
+  }
+
+  &:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 8px #00ff00;
+  }
+
+  svg {
+    fill: #00ff00;
+    width: 28px;
+    height: 28px;
+  }
+`;
+
 // === Random quote config ===
 const cyberQuotes = [
   "“Access is a privilege, not a right.”",
@@ -221,9 +254,16 @@ const SiteLoginPage = () => {
             />
           </FormGroup>
 
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Decrypting..." : "Enter Secure Zone"}
-          </Button>
+          <FingerprintSensor
+            type="submit"
+            disabled={isLoading}
+            aria-label="Scan fingerprint to enter"
+            title="Scan fingerprint"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M12 1a9 9 0 0 0-9 9v2a1 1 0 0 0 2 0v-2a7 7 0 0 1 14 0c0 3.3-1.1 6.3-3 8.7a1 1 0 1 0 1.5 1.3A10 10 0 0 0 21 10a9 9 0 0 0-9-9zm0 4a5 5 0 0 0-5 5v2a1 1 0 1 0 2 0v-2a3 3 0 1 1 6 0 12 12 0 0 1-3 8.5 1 1 0 0 0 1.4 1.4A14 14 0 0 0 17 10a5 5 0 0 0-5-5zm0 4a1 1 0 0 0-1 1v3.3a1 1 0 1 0 2 0V10a1 1 0 0 0-1-1z" />
+            </svg>
+          </FingerprintSensor>
 
           {error && <ErrorMessage>{error}</ErrorMessage>}
         </Form>
