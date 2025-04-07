@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../context/AuthContext";
+import TerminalBootText from "./TerminalBootText";
 
 const LoginContainer = styled.div`
   min-height: 100vh;
@@ -205,19 +206,7 @@ const SiteLoginPage = () => {
       </LogoContainer>
 
       <FormContainer>
-        <Description>
-          <TerminalLine>{typedText}</TerminalLine>
-          <strong style={{ color: "#ff7e5f", fontSize: "1rem" }}>
-            Encrypted Access Required
-          </strong>
-          <p style={{ marginTop: "1rem" }}>
-            This portal is restricted. Only authorized individuals with the
-            passphrase may proceed.
-          </p>
-          <em style={{ color: "#aaa", display: "block", marginTop: "1.5rem" }}>
-            “The truth lies beneath the surface.”
-          </em>
-        </Description>
+        <TerminalBootText />
 
         <Form onSubmit={handleSubmit}>
           <FormGroup>
