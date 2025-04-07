@@ -1,61 +1,9 @@
 // client/src/components/SiteLoginPage.js
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { useAuth } from "../context/AuthContext";
 import TerminalBootText from "./TerminalBootText";
-
-const FingerprintSensor = styled.button`
-  background: none;
-  border: 2px solid #00ff00;
-  border-radius: 50%;
-  padding: 1.2rem;
-  width: 64px;
-  height: 64px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 0 10px #00ff00;
-  position: relative;
-
-  &:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 15px #00ff00;
-  }
-
-  &:active {
-    transform: scale(0.95);
-    box-shadow: 0 0 8px #00ff00;
-  }
-
-  svg {
-    fill: #00ff00;
-    width: 28px;
-    height: 28px;
-  }
-`;
-
-// === Random quote config ===
-const cyberQuotes = [
-  "“Access is a privilege, not a right.”",
-  "“The system is watching. Are you watching back?”",
-  "Tip: Use `sudo` only if you understand the consequences.",
-  "Tip: Encryption is not paranoia. It's protocol.",
-  "“He who controls the logs, controls the truth.”",
-  "“In a time of universal deceit, telling the truth is a revolutionary act.”",
-];
-
-// === Styled Component for the quote ===
-const RandomQuote = styled.p`
-  color: #00ff00;
-  font-family: "Courier New", Courier, monospace;
-  font-size: 0.8rem;
-  text-align: center;
-  margin-top: 1rem;
-`;
 
 const LoginContainer = styled.div`
   min-height: 100vh;
@@ -67,10 +15,31 @@ const LoginContainer = styled.div`
   background-color: #0a0a0a;
   background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
   padding: 1.5rem;
+  position: relative;
 `;
 
-const LogoContainer = styled.div`
-  margin-bottom: 3rem;
+const Overlay = styled.div`
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+`;
+
+const flash = keyframes`
+  0% { opacity: 0; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+`;
+
+const OverlayText = styled.h2`
+  font-family: "Courier New", monospace;
+  color: ${(props) => (props.status === "granted" ? "#00ff00" : "#ff4d4d")};
+  font-size: 2rem;
+  letter-spacing: 1px;
+  animation: ${flash} 0.5s ease-in-out;
   text-align: center;
 `;
 
@@ -98,6 +67,11 @@ const Subtitle = styled.p`
   @media (max-width: 768px) {
     font-size: 0.9rem;
   }
+`;
+
+const LogoContainer = styled.div`
+  margin-bottom: 3rem;
+  text-align: center;
 `;
 
 const FormContainer = styled.div`
@@ -149,32 +123,30 @@ const Input = styled.input`
   }
 `;
 
-const Button = styled.button`
-  background: linear-gradient(135deg, #ff7e5f 0%, #ff6347 100%);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 0.9rem;
-  font-size: 1rem;
-  font-weight: 600;
+const FingerprintButton = styled.button`
+  background: radial-gradient(circle, #1f1f1f, #000);
+  border: 2px solid #444;
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  margin: 0 auto;
+  color: #ff7e5f;
+  font-size: 1.2rem;
+  font-family: "Courier New", monospace;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(255, 126, 95, 0.3);
+  transition: all 0.2s ease;
+  position: relative;
+  box-shadow: 0 0 12px rgba(255, 126, 95, 0.3);
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(255, 126, 95, 0.4);
-  }
-
-  &:active {
-    transform: translateY(0);
+    border-color: #ff7e5f;
+    box-shadow: 0 0 18px rgba(255, 126, 95, 0.5);
+    transform: scale(1.05);
   }
 
   &:disabled {
-    background: #444;
+    opacity: 0.6;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
   }
 `;
 
@@ -196,13 +168,9 @@ const SiteLoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [authStatus, setAuthStatus] = useState(null); // 'granted' or 'denied'
   const { siteLogin, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-
-  const randomQuote = useMemo(() => {
-    const index = Math.floor(Math.random() * cyberQuotes.length);
-    return cyberQuotes[index];
-  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -217,21 +185,40 @@ const SiteLoginPage = () => {
 
     try {
       const success = await siteLogin(password);
-      if (success) {
-        navigate("/");
-      } else {
-        setError("Invalid password. Please try again.");
-      }
+
+      setAuthStatus(success ? "granted" : "denied");
+
+      setTimeout(() => {
+        if (success) {
+          navigate("/");
+        } else {
+          setAuthStatus(null);
+          setError("Access Denied. Invalid passphrase.");
+        }
+        setIsLoading(false);
+      }, 1000);
     } catch (err) {
-      setError("An error occurred. Please try again.");
-      console.error("Login error:", err);
-    } finally {
-      setIsLoading(false);
+      setAuthStatus("denied");
+      setTimeout(() => {
+        setAuthStatus(null);
+        setError("An unexpected error occurred.");
+        setIsLoading(false);
+      }, 1000);
     }
   };
 
   return (
     <LoginContainer>
+      {authStatus && (
+        <Overlay>
+          <OverlayText status={authStatus}>
+            {authStatus === "granted"
+              ? "ACCESS GRANTED\n> loading: [REDACTED].log"
+              : "ACCESS DENIED"}
+          </OverlayText>
+        </Overlay>
+      )}
+
       <LogoContainer>
         <Logo>SOLO UNDERGROUND</Logo>
         <Subtitle>Decrypting Reality. One Article at a Time.</Subtitle>
@@ -239,8 +226,6 @@ const SiteLoginPage = () => {
 
       <FormContainer>
         <TerminalBootText />
-        <RandomQuote>{randomQuote}</RandomQuote>
-
         <Form onSubmit={handleSubmit}>
           <FormGroup>
             <Label htmlFor="password">Access Key</Label>
@@ -254,16 +239,9 @@ const SiteLoginPage = () => {
             />
           </FormGroup>
 
-          <FingerprintSensor
-            type="submit"
-            disabled={isLoading}
-            aria-label="Scan fingerprint to enter"
-            title="Scan fingerprint"
-          >
-            <svg viewBox="0 0 24 24">
-              <path d="M12 1a9 9 0 0 0-9 9v2a1 1 0 0 0 2 0v-2a7 7 0 0 1 14 0c0 3.3-1.1 6.3-3 8.7a1 1 0 1 0 1.5 1.3A10 10 0 0 0 21 10a9 9 0 0 0-9-9zm0 4a5 5 0 0 0-5 5v2a1 1 0 1 0 2 0v-2a3 3 0 1 1 6 0 12 12 0 0 1-3 8.5 1 1 0 0 0 1.4 1.4A14 14 0 0 0 17 10a5 5 0 0 0-5-5zm0 4a1 1 0 0 0-1 1v3.3a1 1 0 1 0 2 0V10a1 1 0 0 0-1-1z" />
-            </svg>
-          </FingerprintSensor>
+          <FingerprintButton type="submit" disabled={isLoading}>
+            {isLoading ? "..." : "🔓"}
+          </FingerprintButton>
 
           {error && <ErrorMessage>{error}</ErrorMessage>}
         </Form>

@@ -62,9 +62,7 @@ const TerminalBootText = () => {
       {lines.map((line, idx) => (
         <Line key={idx}>
           <span>{line}</span>
-          {idx === lines.length - 1 && lineIndex < bootLines.length && (
-            <Cursor>█</Cursor>
-          )}
+          {idx === lines.length - 1 && <Cursor>█</Cursor>}
         </Line>
       ))}
     </Terminal>
