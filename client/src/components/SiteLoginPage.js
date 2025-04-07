@@ -105,11 +105,7 @@ const Input = styled.input`
 `;
 
 const Button = styled.button`
-  background: linear-gradient(
-    135deg,
-    rgba(70, 130, 180, 0.8) 0%,
-    rgba(50, 100, 150, 0.9) 100%
-  );
+  background: linear-gradient(135deg, #ff7e5f 0%, #ff6347 100%);
   color: white;
   border: none;
   border-radius: 4px;
@@ -118,11 +114,11 @@ const Button = styled.button`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(255, 126, 95, 0.3);
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 15px rgba(255, 126, 95, 0.4);
   }
 
   &:active {
@@ -130,7 +126,7 @@ const Button = styled.button`
   }
 
   &:disabled {
-    background: #666;
+    background: #444;
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
@@ -190,30 +186,35 @@ const SiteLoginPage = () => {
     <LoginContainer>
       <LogoContainer>
         <Logo>SOLO UNDERGROUND</Logo>
-        <Subtitle>Independent Journalism & Analysis</Subtitle>
+        <Subtitle>Decrypting Reality. One Article at a Time.</Subtitle>
       </LogoContainer>
 
       <FormContainer>
         <Description>
-          Solo Underground is a private publication. Please enter the access
-          password to continue.
+          <TerminalLine>{`> initializing access protocol_...`}</TerminalLine>
+          <AccessLabel>Encrypted Access Required</AccessLabel>
+          <p style={{ marginTop: "1rem" }}>
+            This portal is restricted. Only authorized individuals with the
+            passphrase may proceed.
+          </p>
+          <Quote>“The truth lies beneath the surface.”</Quote>
         </Description>
 
         <Form onSubmit={handleSubmit}>
           <FormGroup>
-            <Label htmlFor="password">Access Password</Label>
+            <Label htmlFor="password">Access Key</Label>
             <Input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
+              placeholder="••••••••••"
               required
             />
           </FormGroup>
 
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Verifying..." : "Enter"}
+            {isLoading ? "Decrypting..." : "Enter Secure Zone"}
           </Button>
 
           {error && <ErrorMessage>{error}</ErrorMessage>}
@@ -226,5 +227,24 @@ const SiteLoginPage = () => {
     </LoginContainer>
   );
 };
+
+const TerminalLine = styled.pre`
+  font-family: "Courier New", Courier, monospace;
+  color: #999;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+`;
+
+const AccessLabel = styled.strong`
+  color: #ff7e5f;
+  font-size: 1rem;
+  display: block;
+`;
+
+const Quote = styled.em`
+  color: #aaa;
+  display: block;
+  margin-top: 1.5rem;
+`;
 
 export default SiteLoginPage;
