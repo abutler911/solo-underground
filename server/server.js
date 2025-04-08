@@ -2,6 +2,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
 require("dotenv").config();
 const { runJob } = require("./cron/fetchAndRewriteNews");
 
@@ -10,13 +12,47 @@ const articlesRoutes = require("./routes/articles");
 const adminRoutes = require("./routes/admin");
 const authRoutes = require("./routes/auth");
 const uploadRoutes = require("./routes/upload");
-const session = require("express-session");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const isProduction = process.env.NODE_ENV === "production";
 
-// Configure logging
+// Middleware
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://solo-underground.netlify.app",
+      "https://solounderground.com",
+      "https://www.solounderground.com",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+app.use(express.json());
+
+// Use MongoDB for session storage instead of MemoryStore
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "keyboard cat",
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl:
+        process.env.MONGO_URI || "mongodb://localhost:27017/solounderground",
+      ttl: 60 * 60 * 24, // 1 day in seconds
+    }),
+    cookie: {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      maxAge: 1000 * 60 * 60 * 24, // 1 day in milliseconds
+    },
+  })
+);
+
+// Configure request logging
 const logRequest = (req, res, next) => {
   // Only log API requests (not static files)
   if (req.url.startsWith("/api/")) {
@@ -35,34 +71,6 @@ const logRequest = (req, res, next) => {
   }
   next();
 };
-
-// Middleware
-app.use(
-  cors({
-    origin: [
-      "http://localhost:3000",
-      "https://solo-underground.netlify.app",
-      "https://solounderground.com",
-      "https://www.solounderground.com",
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
-app.use(express.json());
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "keyboard cat",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: "none",
-      maxAge: 1000 * 60 * 60 * 24,
-    },
-  })
-);
 
 // Add request logging after other middleware
 app.use(logRequest);
