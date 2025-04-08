@@ -1,0 +1,67 @@
+{
+  "articlesFetched": 5,
+  "articlesProcessed": 1,
+  "articlesRejected": 0,
+  "totalCost": 0.00099,
+  "reporterStats": {
+    "Cade Vox": {
+      "articlesWritten": 0,
+      "avgQualityScore": 0,
+      "avgWordCount": 0,
+      "topicsCovered": {},
+      "lastUsed": null
+    },
+    "Juno Blaze": {
+      "articlesWritten": 1,
+      "avgQualityScore": 64,
+      "avgWordCount": 191,
+      "topicsCovered": {
+        "US politics": 1
+      },
+      "lastUsed": "2025-04-08T15:10:22.645Z"
+    },
+    "Dex Rawlins": {
+      "articlesWritten": 0,
+      "avgQualityScore": 0,
+      "avgWordCount": 0,
+      "topicsCovered": {},
+      "lastUsed": null
+    },
+    "Luna Trace": {
+      "articlesWritten": 0,
+      "avgQualityScore": 0,
+      "avgWordCount": 0,
+      "topicsCovered": {},
+      "lastUsed": null
+    },
+    "Brick Malone": {
+      "articlesWritten": 0,
+      "avgQualityScore": 0,
+      "avgWordCount": 0,
+      "topicsCovered": {},
+      "lastUsed": null
+    },
+    "Echo Vox": {
+      "articlesWritten": 0,
+      "avgQualityScore": 0,
+      "avgWordCount": 0,
+      "topicsCovered": {},
+      "lastUsed": null
+    },
+    "Max Power": {
+      "articlesWritten": 0,
+      "avgQualityScore": 0,
+      "avgWordCount": 0,
+      "topicsCovered": {},
+      "lastUsed": null
+    },
+    "Sage Winters": {
+      "articlesWritten": 0,
+      "avgQualityScore": 0,
+      "avgWordCount": 0,
+      "topicsCovered": {},
+      "lastUsed": null
+    }
+  },
+  "lastUpdated": "2025-04-08T15:09:10.558Z"
+}

@@ -615,12 +615,14 @@ function scoreArticleQuality(data) {
   let score = 0;
   const MAX_SCORE = 100;
 
-  // Check content length (aim for 500-1500 words)
+  // Check content length (aim for 400-600 words as per the prompt)
   const wordCount = data.rewritten.split(/\s+/).length;
-  if (wordCount >= 500 && wordCount <= 1500) {
-    score += 20;
-  } else if (wordCount > 300) {
-    score += 10;
+  if (wordCount >= 400 && wordCount <= 600) {
+    score += 25; // Increased from 20 if it matches the exact target range
+  } else if (wordCount >= 300 && wordCount < 400) {
+    score += 15; // Increased mid-range score
+  } else if (wordCount > 600) {
+    score += 10; // Still reward longer content
   }
 
   // Check paragraph count (aim for 4+ paragraphs)
@@ -629,7 +631,7 @@ function scoreArticleQuality(data) {
 
   // Check for quotes
   if (data.quotes && data.quotes.length > 0) {
-    score += data.quotes.length * 5;
+    score += data.quotes.length * 7; // Increased from 5
   }
 
   // Check for HTML formatting
@@ -660,37 +662,48 @@ function scoreArticleQuality(data) {
     "shocking",
     "must",
     "never",
+    "inside",
+    "truth",
+    "power",
+    "fight",
+    "battle",
+    "war",
+    "crisis",
   ];
-  if (
-    data.title &&
-    compellingWords.some((word) => data.title.toLowerCase().includes(word))
-  ) {
-    score += 5;
+
+  if (data.title) {
+    const titleLower = data.title.toLowerCase();
+    const matchCount = compellingWords.filter((word) =>
+      titleLower.includes(word)
+    ).length;
+    score += matchCount * 3; // Give points for each compelling word
   }
 
   // Cap at 100
   return Math.min(score, MAX_SCORE);
 }
-
 // Update reporter stats after article generation
 function updateReporterStats(reporter, articleData, qualityScore) {
-  const stats = stats.reporterStats[reporter.name];
+  const reporterStats = stats.reporterStats[reporter.name];
 
   // Update counters
-  stats.articlesWritten++;
+  reporterStats.articlesWritten++;
 
   // Update averages
   const wordCount = articleData.rewritten.split(/\s+/).length;
-  stats.avgWordCount =
-    (stats.avgWordCount * (stats.articlesWritten - 1) + wordCount) /
-    stats.articlesWritten;
-  stats.avgQualityScore =
-    (stats.avgQualityScore * (stats.articlesWritten - 1) + qualityScore) /
-    stats.articlesWritten;
+  reporterStats.avgWordCount =
+    (reporterStats.avgWordCount * (reporterStats.articlesWritten - 1) +
+      wordCount) /
+    reporterStats.articlesWritten;
+  reporterStats.avgQualityScore =
+    (reporterStats.avgQualityScore * (reporterStats.articlesWritten - 1) +
+      qualityScore) /
+    reporterStats.articlesWritten;
 
   // Update topic coverage
   const topic = articleData.topic;
-  stats.topicsCovered[topic] = (stats.topicsCovered[topic] || 0) + 1;
+  reporterStats.topicsCovered[topic] =
+    (reporterStats.topicsCovered[topic] || 0) + 1;
 }
 
 // Save stats to file
@@ -717,10 +730,20 @@ async function runJob() {
   stats.articlesRejected = 0;
   stats.lastUpdated = new Date();
 
+  // Flag to track if we've already processed an article
+  let articleProcessed = false;
+
   const selectedTopics = getRandomTopicsWithDiversity(2);
   console.log(`[CRON] Fetching topics: ${selectedTopics.join(", ")}`);
 
+  // Loop through topics
   for (const topic of selectedTopics) {
+    // If we've already processed an article, skip remaining topics
+    if (articleProcessed) {
+      console.log(`[CRON] Skipping topic "${topic}" - article limit reached`);
+      continue;
+    }
+
     // Fetch articles matching the topic
     const articles = await fetchArticlesFromRSS(topic);
     stats.articlesFetched += articles.length;
@@ -729,12 +752,12 @@ async function runJob() {
       `[CRON] Found ${articles.length} articles for topic "${topic}"`
     );
 
-    // Limit article processing to save costs
-    // Get the top article or a random one from top 3
+    // If no articles found, try next topic
     if (articles.length === 0) continue;
 
-    // Process top articles by recency
-    const articlesToProcess = articles.slice(0, 2);
+    // Process ONLY the top article by recency
+    const articlesToProcess = articles.slice(0, 1); // Take only the first article
+
     for (const rawArticle of articlesToProcess) {
       console.log(`[CRON] Processing article: "${rawArticle.title}"`);
 
@@ -800,8 +823,17 @@ async function runJob() {
         });
 
         // Update reporter statistics
-        updateReporterStats(reporter, data, qualityScore);
+        try {
+          updateReporterStats(reporter, data, qualityScore);
+        } catch (statsError) {
+          console.error(
+            `[STATS ERROR] Failed to update reporter stats: ${statsError.message}`
+          );
+          // Continue processing even if stats update fails
+        }
+
         stats.articlesProcessed++;
+        articleProcessed = true; // Mark that we've processed an article
 
         console.log(
           `[CRON] ✅ Staged article by ${reporter.name}: "${
@@ -820,6 +852,9 @@ async function runJob() {
             `[EMAIL] Failed to send notification: ${emailErr.message}`
           );
         }
+
+        // Break out of the loop once we've processed one article
+        break;
       } catch (err) {
         console.error(
           `[ERROR] Failed to save article "${rawArticle.title}":`,
@@ -834,6 +869,12 @@ async function runJob() {
           }
         }
       }
+    }
+
+    // If we've processed an article, no need to check more topics
+    if (articleProcessed) {
+      console.log(`[CRON] Article limit reached, stopping processing`);
+      break;
     }
   }
 
@@ -853,8 +894,8 @@ function scheduleJobs() {
   // Initialize cache when the server starts
   initializeCache();
 
-  // Schedule to run at 8am and 6pm UTC
-  cron.schedule("0 8,18 * * *", async () => {
+  // Schedule to run at 6am and 12pm Mountain Time (12pm and 6pm UTC during DST)
+  cron.schedule("0 12,18 * * *", async () => {
     try {
       console.log("[CRON] Scheduled job running...");
       await runJob();
@@ -864,7 +905,7 @@ function scheduleJobs() {
     }
   });
 
-  console.log("[CRON] Job scheduled to run at 8am and 6pm UTC");
+  console.log("[CRON] Job scheduled to run at 6am and 12pm Mountain Time");
 }
 
 module.exports = {
