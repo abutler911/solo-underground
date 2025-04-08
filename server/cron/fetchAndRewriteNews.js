@@ -1,3 +1,4 @@
+// server/cron/fetchAndRewriteNews.js
 const cron = require("node-cron");
 const axios = require("axios");
 const OpenAI = require("openai");
@@ -6,12 +7,412 @@ const topics = require("../utils/topics");
 const Article = require("../models/Article");
 const reporters = require("../utils/reporters");
 const Parser = require("rss-parser");
+const fs = require("fs").promises;
+const path = require("path");
 const parser = new Parser();
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-function getRandomTopics(count = 2) {
-  return [...topics].sort(() => 0.5 - Math.random()).slice(0, count);
+// Stats tracking
+let stats = {
+  articlesFetched: 0,
+  articlesProcessed: 0,
+  articlesRejected: 0,
+  totalCost: 0,
+  reporterStats: {},
+  lastUpdated: new Date(),
+};
+
+// Cache directory for RSS feeds
+const CACHE_DIR = path.join(__dirname, "../cache");
+const RSS_CACHE_FILE = path.join(CACHE_DIR, "rss-cache.json");
+
+// Initialize cache directory if it doesn't exist
+async function initializeCache() {
+  try {
+    await fs.mkdir(CACHE_DIR, { recursive: true });
+    console.log("[CACHE] Directory initialized");
+  } catch (err) {
+    console.error("[CACHE] Error initializing cache directory:", err.message);
+  }
+}
+
+// Track which reporters and topics were recently used
+let recentReporters = [];
+let recentTopics = [];
+
+// Reporter stats tracking
+function initReporterStats() {
+  for (const reporter of reporters) {
+    if (!stats.reporterStats[reporter.name]) {
+      stats.reporterStats[reporter.name] = {
+        articlesWritten: 0,
+        avgQualityScore: 0,
+        avgWordCount: 0,
+        topicsCovered: {},
+        lastUsed: null,
+      };
+    }
+  }
+}
+
+// Get diversity-aware topics
+function getRandomTopicsWithDiversity(count = 2) {
+  // Filter out recently used topics
+  const availableTopics = topics.filter(
+    (topic) => !recentTopics.includes(topic)
+  );
+
+  // If all topics were recently used, reset tracking
+  const topicPool = availableTopics.length >= count ? availableTopics : topics;
+
+  // Get random topics
+  const selectedTopics = [...topicPool]
+    .sort(() => 0.5 - Math.random())
+    .slice(0, count);
+
+  // Update tracking (keep last 5)
+  recentTopics = [...recentTopics, ...selectedTopics];
+  if (recentTopics.length > 5) {
+    recentTopics = recentTopics.slice(recentTopics.length - 5);
+  }
+
+  return selectedTopics;
+}
+
+// Get a reporter biased toward the topic
+function getReporterForTopic(topic) {
+  // Find reporters who specialize in this topic
+  const specializedReporters = reporters.filter(
+    (reporter) => reporter.topics && reporter.topics.includes(topic)
+  );
+
+  // Use specialized if available, otherwise filter by recently used
+  const reporterPool =
+    specializedReporters.length > 0
+      ? specializedReporters.filter((r) => !recentReporters.includes(r.name))
+      : reporters.filter((r) => !recentReporters.includes(r.name));
+
+  // Final pool selection
+  const finalPool =
+    reporterPool.length > 0
+      ? reporterPool
+      : specializedReporters.length > 0
+      ? specializedReporters
+      : reporters;
+
+  // Select reporter
+  const reporter = finalPool[Math.floor(Math.random() * finalPool.length)];
+
+  // Update tracking (keep last 3)
+  recentReporters.push(reporter.name);
+  if (recentReporters.length > 3) {
+    recentReporters.shift();
+  }
+
+  // Update reporter stats
+  stats.reporterStats[reporter.name].lastUsed = new Date();
+
+  return reporter;
+}
+
+// Sanitize text for prompts
+function sanitizeText(text) {
+  if (!text) return "";
+  return text
+    .replace(/<[^>]*>/g, "") // Strip HTML
+    .replace(/\s+/g, " ") // Collapse whitespace
+    .replace(/["']/g, "") // Remove quotes
+    .trim() // Trim excess whitespace
+    .substring(0, 1500); // Limit length for cost control
+}
+
+// Estimate tokens
+function estimateTokenCount(text) {
+  // Rough estimation: ~4 chars per token for English text
+  return Math.ceil(text.length / 4);
+}
+
+// Check for article duplication
+async function isDuplicateArticle(article) {
+  try {
+    // Check exact URL match
+    const exactMatch = await Article.findOne({ sourceUrl: article.url });
+    if (exactMatch) {
+      console.log(`[DEDUP] Exact URL match found for "${article.title}"`);
+      return true;
+    }
+
+    // Check title similarity (basic implementation - could use a proper string similarity lib)
+    const normalizedTitle = article.title.toLowerCase().replace(/[^\w\s]/g, "");
+    const similarTitleArticles = await Article.find({
+      $or: [
+        { title: { $regex: normalizedTitle.substring(0, 30), $options: "i" } },
+        {
+          original: { $regex: normalizedTitle.substring(0, 30), $options: "i" },
+        },
+      ],
+    });
+
+    if (similarTitleArticles.length > 0) {
+      console.log(`[DEDUP] Similar title match found for "${article.title}"`);
+      return true;
+    }
+
+    return false;
+  } catch (err) {
+    console.error("[DEDUP] Error checking for duplicates:", err.message);
+    return false; // Default to not duplicate on error
+  }
+}
+
+// Read or create RSS cache
+async function getRssCache() {
+  try {
+    const data = await fs.readFile(RSS_CACHE_FILE, "utf8");
+    const cache = JSON.parse(data);
+
+    // Check if cache is still valid (less than 24 hours old)
+    const cacheTime = new Date(cache.timestamp);
+    const now = new Date();
+    const hoursSinceCache = (now - cacheTime) / (1000 * 60 * 60);
+
+    if (hoursSinceCache < 24) {
+      console.log(
+        `[CACHE] Using RSS cache from ${hoursSinceCache.toFixed(1)} hours ago`
+      );
+      return cache.articles;
+    }
+    console.log("[CACHE] Cache expired, fetching fresh RSS feeds");
+    return null;
+  } catch (err) {
+    console.log("[CACHE] No valid cache found, fetching fresh RSS feeds");
+    return null;
+  }
+}
+
+// Save RSS cache
+async function saveRssCache(articles) {
+  try {
+    const cache = {
+      timestamp: new Date(),
+      articles: articles,
+    };
+    await fs.writeFile(RSS_CACHE_FILE, JSON.stringify(cache, null, 2));
+    console.log("[CACHE] RSS feeds cached successfully");
+  } catch (err) {
+    console.error("[CACHE] Failed to cache RSS feeds:", err.message);
+  }
+}
+
+// Classify topic relevance
+async function classifyTopicRelevance(article, topic) {
+  // Lightweight classification to avoid unnecessary GPT-4 calls
+  if (!topic) return true; // No topic filter means all articles are relevant
+
+  try {
+    // Use original topic matching first (efficient)
+    const topicWords = topic.split(/\s+/).filter((word) => word.length > 3);
+
+    if (topicWords.length > 0) {
+      const topicPatterns = topicWords.map((word) => new RegExp(word, "i"));
+      const fullText = `${article.title} ${article.description} ${article.content}`;
+
+      // If basic pattern matching works, return early
+      if (topicPatterns.some((pattern) => pattern.test(fullText))) {
+        return true;
+      }
+    }
+
+    // For more accurate but costlier classification, use OpenAI
+    // Only for articles that didn't match via pattern matching
+    const prompt = `
+      Rate the relevance of this article to the topic "${topic}" on a scale of 1-10:
+      
+      Title: ${sanitizeText(article.title)}
+      Content: ${sanitizeText(article.description || article.content).substring(
+        0,
+        300
+      )}
+      
+      Provide only a number from 1-10 as your answer.
+    `;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a classifier that rates article relevance to topics. Respond only with a number from 1-10.",
+        },
+        { role: "user", content: prompt },
+      ],
+      max_tokens: 10,
+      temperature: 0.1,
+    });
+
+    const response = completion.choices[0].message.content.trim();
+    const score = parseInt(response, 10);
+
+    // Count this as relevant if score is 6 or higher
+    return !isNaN(score) && score >= 6;
+  } catch (err) {
+    console.error("[CLASSIFY] Error classifying topic relevance:", err.message);
+    // Fall back to basic matching if classification fails
+    return true;
+  }
+}
+
+async function fetchArticlesFromRSS(topic) {
+  // Check cache first
+  const cachedArticles = await getRssCache();
+  if (cachedArticles) {
+    // If we have cached articles, filter by topic and return
+    const topicFiltered = [];
+    for (const article of cachedArticles) {
+      if (await classifyTopicRelevance(article, topic)) {
+        topicFiltered.push(article);
+      }
+    }
+
+    console.log(
+      `[CACHE] Found ${topicFiltered.length} relevant articles for topic "${topic}"`
+    );
+    return topicFiltered.slice(0, 5); // Limit to top 5 articles
+  }
+
+  try {
+    // Define a list of RSS feeds for different news sources with updated URLs
+    const rssSources = [
+      // General news
+      {
+        url: "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+        name: "New York Times",
+      },
+      {
+        url: "https://feeds.bbci.co.uk/news/world/rss.xml",
+        name: "BBC News",
+      },
+      {
+        url: "https://www.theguardian.com/world/rss",
+        name: "The Guardian",
+      },
+      {
+        url: "https://www.npr.org/rss/rss.php?id=1004",
+        name: "NPR",
+      },
+
+      // More reliable tech news
+      {
+        url: "https://www.theverge.com/rss/index.xml",
+        name: "The Verge",
+      },
+      {
+        url: "https://feeds.arstechnica.com/arstechnica/index",
+        name: "Ars Technica",
+      },
+
+      // Business/Finance
+      {
+        url: "https://www.wsj.com/xml/rss/3_7085.xml",
+        name: "Wall Street Journal",
+      },
+      {
+        url: "https://www.economist.com/international/rss.xml",
+        name: "The Economist",
+      },
+    ];
+
+    // Add error handling timeout to fetch operations
+    const fetchWithTimeout = async (url, timeout = 10000) => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      try {
+        const feed = await parser.parseURL(url);
+        clearTimeout(timeoutId);
+        return feed;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+      }
+    };
+
+    // Randomly select 3-4 sources
+    const selectedSources = [...rssSources]
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 4);
+
+    let allArticles = [];
+    let successCount = 0;
+
+    // Fetch from each selected source
+    for (const source of selectedSources) {
+      try {
+        console.log(`[RSS] Fetching from ${source.name}`);
+        const feed = await fetchWithTimeout(source.url);
+        successCount++;
+
+        // Process the RSS feed items
+        const articles = feed.items.map((item) => ({
+          title: sanitizeText(item.title),
+          description: sanitizeText(
+            item.contentSnippet || item.content || item.summary || ""
+          ),
+          content: sanitizeText(
+            item.content || item.contentSnippet || item.summary || ""
+          ),
+          url: item.link,
+          publishedAt: item.pubDate || item.isoDate,
+          author: item.creator || item.author || source.name,
+          source: {
+            name: source.name,
+            url: source.url,
+          },
+        }));
+
+        allArticles = allArticles.concat(articles);
+      } catch (sourceErr) {
+        console.error(
+          `[ERROR] Failed to fetch from ${source.name}:`,
+          sourceErr.message
+        );
+      }
+    }
+
+    console.log(
+      `[RSS] Successfully fetched ${allArticles.length} articles from ${successCount}/${selectedSources.length} sources`
+    );
+
+    // Save all articles to cache for future use
+    if (allArticles.length > 0) {
+      await saveRssCache(allArticles);
+    }
+
+    // Filter by topic relevance
+    const topicFiltered = [];
+    for (const article of allArticles) {
+      if (await classifyTopicRelevance(article, topic)) {
+        topicFiltered.push(article);
+      }
+    }
+
+    console.log(
+      `[RSS] Found ${topicFiltered.length} relevant articles for topic "${topic}"`
+    );
+
+    // Sort by recency and return limited number
+    return topicFiltered
+      .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+      .slice(0, 5);
+  } catch (err) {
+    console.error(
+      `[ERROR] Fetching RSS feeds for topic "${topic}":`,
+      err.message
+    );
+    return [];
+  }
 }
 
 function tryParseJson(raw, title) {
@@ -63,195 +464,22 @@ function tryParseJson(raw, title) {
   }
 }
 
-async function fetchArticlesFromRSS(topic) {
-  try {
-    // Define a list of RSS feeds for different news sources with updated URLs
-    const rssSources = [
-      // General news
-      {
-        url: "https://rss.nytimes.com/services/xml/rss/nyt/World.xml", // More specific NYT feed
-        name: "New York Times",
-      },
-      {
-        url: "https://feeds.bbci.co.uk/news/world/rss.xml", // Use world news feed
-        name: "BBC News",
-      },
-      {
-        url: "https://www.theguardian.com/world/rss",
-        name: "The Guardian",
-      },
-      {
-        url: "https://www.npr.org/rss/rss.php?id=1004", // NPR world news feed
-        name: "NPR",
-      },
-
-      // More reliable tech news
-      {
-        url: "https://www.theverge.com/rss/index.xml",
-        name: "The Verge",
-      },
-      {
-        url: "https://feeds.arstechnica.com/arstechnica/index",
-        name: "Ars Technica",
-      },
-
-      // Business/Finance
-      {
-        url: "https://www.wsj.com/xml/rss/3_7085.xml", // WSJ world news
-        name: "Wall Street Journal",
-      },
-      {
-        url: "https://www.economist.com/international/rss.xml",
-        name: "The Economist",
-      },
-    ];
-
-    // Add error handling timeout to fetch operations
-    const fetchWithTimeout = async (url, timeout = 10000) => {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-      try {
-        const feed = await parser.parseURL(url);
-        clearTimeout(timeoutId);
-        return feed;
-      } catch (error) {
-        clearTimeout(timeoutId);
-        throw error;
-      }
-    };
-
-    // Randomly select 3-4 sources (increased from 2-3)
-    const selectedSources = [...rssSources]
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 4);
-
-    let allArticles = [];
-    let successCount = 0;
-
-    // Fetch from each selected source
-    for (const source of selectedSources) {
-      try {
-        console.log(`[RSS] Fetching from ${source.name}`);
-        const feed = await fetchWithTimeout(source.url);
-        successCount++;
-
-        // Process the RSS feed items
-        const articles = feed.items.map((item) => ({
-          title: item.title,
-          description:
-            item.contentSnippet || item.content || item.summary || "",
-          content: item.content || item.contentSnippet || item.summary || "",
-          url: item.link,
-          publishedAt: item.pubDate || item.isoDate,
-          author: item.creator || item.author || source.name,
-          source: {
-            name: source.name,
-            url: source.url,
-          },
-        }));
-
-        // Make topic matching more flexible
-        let filteredArticles = articles;
-
-        if (topic) {
-          // Create a more flexible regex by breaking the topic into words
-          const topicWords = topic
-            .split(/\s+/)
-            .filter((word) => word.length > 3);
-
-          // If we have meaningful words, create regex patterns for each
-          if (topicWords.length > 0) {
-            // Match any of the significant words in the topic
-            const topicPatterns = topicWords.map(
-              (word) => new RegExp(word, "i")
-            );
-
-            filteredArticles = articles.filter((article) => {
-              const fullText = `${article.title} ${article.description} ${article.content}`;
-              // Article matches if any significant word is found
-              return topicPatterns.some((pattern) => pattern.test(fullText));
-            });
-          }
-        }
-
-        console.log(
-          `[RSS] Found ${filteredArticles.length} matching articles from ${source.name}`
-        );
-
-        // Take up to 2 matching articles from each source
-        if (filteredArticles.length > 0) {
-          allArticles = allArticles.concat(filteredArticles.slice(0, 2));
-        }
-      } catch (sourceErr) {
-        console.error(
-          `[ERROR] Failed to fetch from ${source.name}:`,
-          sourceErr.message
-        );
-      }
-    }
-
-    console.log(
-      `[RSS] Successfully fetched from ${successCount}/${selectedSources.length} sources`
-    );
-    console.log(
-      `[RSS] Found ${allArticles.length} total articles for topic "${topic}"`
-    );
-
-    // If we found no articles with the exact topic, use a fallback approach
-    if (allArticles.length === 0 && successCount > 0) {
-      console.log(
-        `[RSS] No exact matches found for "${topic}". Using recent articles instead.`
-      );
-
-      // Get most recent articles from the successful feeds
-      const recentArticles = [];
-      for (const source of selectedSources) {
-        try {
-          const feed = await fetchWithTimeout(source.url);
-          // Just take the most recent article
-          if (feed.items && feed.items.length > 0) {
-            const mostRecent = feed.items[0];
-            recentArticles.push({
-              title: mostRecent.title,
-              description:
-                mostRecent.contentSnippet ||
-                mostRecent.content ||
-                mostRecent.summary ||
-                "",
-              content:
-                mostRecent.content ||
-                mostRecent.contentSnippet ||
-                mostRecent.summary ||
-                "",
-              url: mostRecent.link,
-              publishedAt: mostRecent.pubDate || mostRecent.isoDate,
-              author: mostRecent.creator || mostRecent.author || source.name,
-              source: {
-                name: source.name,
-                url: source.url,
-              },
-            });
-          }
-        } catch (err) {
-          // Skip failed sources in fallback
-        }
-      }
-
-      return recentArticles.slice(0, 2); // Return up to 2 recent articles as fallback
-    }
-
-    return allArticles;
-  } catch (err) {
-    console.error(
-      `[ERROR] Fetching RSS feeds for topic "${topic}":`,
-      err.message
-    );
-    return [];
-  }
-}
-
 async function rewriteArticle(article, reporter) {
+  // Check token count for cost control
+  const combinedText = `${article.title} ${
+    article.content || article.description || ""
+  }`;
+  const estimatedTokens = estimateTokenCount(combinedText);
+
+  if (estimatedTokens > 3000) {
+    console.log(
+      `[TOKENS] Article too long (est. ${estimatedTokens} tokens), truncating content`
+    );
+    // Truncate to keep costs reasonable
+    article.content = article.content?.substring(0, 1500) || "";
+    article.description = article.description?.substring(0, 1500) || "";
+  }
+
   const topicList = topics.map((t) => `"${t}"`).join(", ");
   const prompt = `
   You are ${reporter.name}, ${reporter.description}.
@@ -296,16 +524,22 @@ async function rewriteArticle(article, reporter) {
   Source: ${article.source?.name || "News Source"}
   `;
 
-  // Choose model based on article complexity
-  const wordCount = (article.content || article.description || "").split(
-    /\s+/
-  ).length;
+  // Use A/B testing between models
+  const today = new Date();
+  const dayOfMonth = today.getDate();
 
-  // Always use GPT-4 for better quality
-  const model = "gpt-4";
+  // Use GPT-3.5 on certain days for cost savings (e.g., days 1-6, 15-20 of each month)
+  const useGpt35 =
+    (dayOfMonth >= 1 && dayOfMonth <= 6) ||
+    (dayOfMonth >= 15 && dayOfMonth <= 20);
 
-  console.log(`[MODEL] Using ${model} for article with ${wordCount} words`);
+  const model = useGpt35 ? "gpt-3.5-turbo-16k" : "gpt-4";
+
+  console.log(`[MODEL] Using ${model} for article rewrite`);
+
   try {
+    const startTime = Date.now();
+
     const completion = await openai.chat.completions.create({
       model: model,
       messages: [
@@ -319,12 +553,29 @@ async function rewriteArticle(article, reporter) {
       temperature: 0.8,
     });
 
+    const endTime = Date.now();
+    const processingTime = (endTime - startTime) / 1000;
+
+    // Estimate cost (very rough approximation)
+    const costEstimate = useGpt35
+      ? 0.002 * (estimatedTokens / 1000)
+      : 0.03 * (estimatedTokens / 1000);
+    stats.totalCost += costEstimate;
+
+    console.log(
+      `[COST] Estimated cost: $${costEstimate.toFixed(
+        4
+      )} | Running total: $${stats.totalCost.toFixed(4)}`
+    );
+    console.log(`[TIME] Processing time: ${processingTime.toFixed(2)}s`);
+
     const raw = completion.choices[0].message.content.trim();
     console.log(
       `[DEBUG] Raw response for "${
         article.title
       }" (first 200 chars): ${raw.substring(0, 200)}...`
     );
+
     const data = tryParseJson(raw, article.title);
     // Additional validation and defaults
     if (data) {
@@ -347,6 +598,7 @@ async function rewriteArticle(article, reporter) {
                 url: article.url || "",
               },
             ],
+        model: model, // Track which model was used
       };
     }
     return null;
@@ -357,154 +609,6 @@ async function rewriteArticle(article, reporter) {
     );
     return null;
   }
-}
-
-async function runJob() {
-  const selectedTopics = getRandomTopicsWithDiversity(); // Use the diversity-aware function
-  console.log(`[CRON] Fetching topics: ${selectedTopics.join(", ")}`);
-
-  for (const topic of selectedTopics) {
-    const articles = await fetchArticlesFromRSS(topic); // Fetch articles from RSS
-    console.log(
-      `[CRON] Found ${articles.length} articles for topic "${topic}"`
-    );
-
-    for (const rawArticle of articles) {
-      console.log(`[CRON] Processing article: "${rawArticle.title}"`);
-
-      // Use the diversity-aware reporter selection
-      const reporter = getRandomReporter();
-      console.log(`[CRON] Selected reporter: ${reporter.name}`);
-
-      const data = await rewriteArticle(rawArticle, reporter);
-
-      if (!data) {
-        console.warn(
-          `[SKIP] Rewrite failed completely for "${rawArticle.title}"`
-        );
-        continue;
-      }
-
-      // Calculate quality score instead of just checking missing fields
-      const qualityScore = scoreArticleQuality(data);
-      console.log(`[QUALITY] Article scored: ${qualityScore}/100`);
-
-      // Only save high-quality content
-      if (qualityScore < 60) {
-        console.warn(
-          `[QUALITY] Article rejected due to low score: ${qualityScore}/100`
-        );
-        continue;
-      }
-
-      try {
-        // Create article with all possible fields, providing defaults for missing ones
-        await Article.create({
-          title: rawArticle.title,
-          original: rawArticle.content || rawArticle.description || "",
-          content: data.rewritten,
-          summary: data.summary,
-          tags: data.tags,
-          citations: data.citations || [
-            {
-              title: rawArticle.source?.name || "Original Source",
-              url: rawArticle.url || "",
-            },
-          ],
-          author: reporter.name,
-          voiceId: reporter.voiceId,
-          topic: data.topic,
-          category: data.category || "Editorial",
-          sourceUrl: rawArticle.url,
-          photoCredit: data.photoCredit || rawArticle.source?.name || "",
-          quotes: data.quotes || [],
-          status: "draft",
-          createdAt: new Date(),
-        });
-
-        console.log(
-          `[CRON] ✅ Staged article by ${reporter.name}: "${rawArticle.title}"`
-        );
-      } catch (err) {
-        console.error(
-          `[ERROR] Failed to save article "${rawArticle.title}":`,
-          err.message
-        );
-        // Log the exact Mongoose validation error for debugging
-        if (err.name === "ValidationError") {
-          for (const field in err.errors) {
-            console.error(`- ${field}: ${err.errors[field].message}`);
-          }
-        }
-      }
-    }
-  }
-}
-
-function scheduleJobs() {
-  cron.schedule("0 8,18 * * *", async () => {
-    try {
-      console.log("[CRON] Scheduled job running...");
-      await runJob();
-      console.log("[CRON] Job complete.");
-    } catch (err) {
-      console.error("[CRON ERROR]:", err.message);
-    }
-  });
-  console.log("[CRON] Job scheduled to run at 8am and 6pm UTC");
-}
-
-// In server/cron/fetchAndRewriteNews.js
-
-// Track which reporters and topics were recently used
-let recentReporters = [];
-let recentTopics = [];
-
-function getRandomReporter() {
-  // Filter out recently used reporters for variety
-  const availableReporters = reporters.filter(
-    (reporter) => !recentReporters.includes(reporter.name)
-  );
-
-  // If all reporters were recently used, reset the tracking
-  const reporterPool =
-    availableReporters.length > 0 ? availableReporters : reporters;
-
-  // Select a random reporter
-  const reporter =
-    reporterPool[Math.floor(Math.random() * reporterPool.length)];
-
-  // Update tracking (keep last 3)
-  recentReporters.push(reporter.name);
-  if (recentReporters.length > 3) {
-    recentReporters.shift();
-  }
-
-  return reporter;
-}
-
-// Similar function for topics
-function getRandomTopicsWithDiversity(count = 2) {
-  // Filter out recently used topics
-  const availableTopics = topics.filter(
-    (topic) => !recentTopics.includes(topic)
-  );
-
-  // If all topics were recently used, reset tracking
-  const topicPool = availableTopics.length >= count ? availableTopics : topics;
-
-  // Get random topics
-  const selectedTopics = [...topicPool]
-    .sort(() => 0.5 - Math.random())
-    .slice(0, count);
-
-  // Update tracking (keep last 5)
-  recentTopics = [...recentTopics, ...selectedTopics];
-  if (recentTopics.length > 5) {
-    recentTopics = recentTopics.slice(recentTopics.length - 5);
-  }
-
-  return selectedTopics;
 }
 
 function scoreArticleQuality(data) {
@@ -546,8 +650,221 @@ function scoreArticleQuality(data) {
     score += 10;
   }
 
+  // Bonus for titles with compelling words
+  const compellingWords = [
+    "why",
+    "how",
+    "revealed",
+    "exclusive",
+    "secret",
+    "shocking",
+    "must",
+    "never",
+  ];
+  if (
+    data.title &&
+    compellingWords.some((word) => data.title.toLowerCase().includes(word))
+  ) {
+    score += 5;
+  }
+
   // Cap at 100
   return Math.min(score, MAX_SCORE);
+}
+
+// Update reporter stats after article generation
+function updateReporterStats(reporter, articleData, qualityScore) {
+  const stats = stats.reporterStats[reporter.name];
+
+  // Update counters
+  stats.articlesWritten++;
+
+  // Update averages
+  const wordCount = articleData.rewritten.split(/\s+/).length;
+  stats.avgWordCount =
+    (stats.avgWordCount * (stats.articlesWritten - 1) + wordCount) /
+    stats.articlesWritten;
+  stats.avgQualityScore =
+    (stats.avgQualityScore * (stats.articlesWritten - 1) + qualityScore) /
+    stats.articlesWritten;
+
+  // Update topic coverage
+  const topic = articleData.topic;
+  stats.topicsCovered[topic] = (stats.topicsCovered[topic] || 0) + 1;
+}
+
+// Save stats to file
+async function saveStats() {
+  try {
+    const statsFile = path.join(CACHE_DIR, "generator-stats.json");
+    await fs.writeFile(statsFile, JSON.stringify(stats, null, 2));
+    console.log("[STATS] Saved to file");
+  } catch (err) {
+    console.error("[STATS] Failed to save stats:", err.message);
+  }
+}
+
+async function runJob() {
+  // Import the email service
+  const { sendArticleNotification } = require("../utils/emailService");
+
+  // Initialize reporter stats if needed
+  initReporterStats();
+
+  // Reset job counters
+  stats.articlesFetched = 0;
+  stats.articlesProcessed = 0;
+  stats.articlesRejected = 0;
+  stats.lastUpdated = new Date();
+
+  const selectedTopics = getRandomTopicsWithDiversity(2);
+  console.log(`[CRON] Fetching topics: ${selectedTopics.join(", ")}`);
+
+  for (const topic of selectedTopics) {
+    // Fetch articles matching the topic
+    const articles = await fetchArticlesFromRSS(topic);
+    stats.articlesFetched += articles.length;
+
+    console.log(
+      `[CRON] Found ${articles.length} articles for topic "${topic}"`
+    );
+
+    // Limit article processing to save costs
+    // Get the top article or a random one from top 3
+    if (articles.length === 0) continue;
+
+    // Process top articles by recency
+    const articlesToProcess = articles.slice(0, 2);
+    for (const rawArticle of articlesToProcess) {
+      console.log(`[CRON] Processing article: "${rawArticle.title}"`);
+
+      // Skip duplicates
+      if (await isDuplicateArticle(rawArticle)) {
+        console.log(`[SKIP] Duplicate article detected: "${rawArticle.title}"`);
+        stats.articlesRejected++;
+        continue;
+      }
+
+      // Get reporter specialized in this topic
+      const reporter = getReporterForTopic(topic);
+      console.log(`[CRON] Selected reporter: ${reporter.name}`);
+
+      // Rewrite the article
+      const data = await rewriteArticle(rawArticle, reporter);
+
+      // Skip if rewrite failed
+      if (!data) {
+        console.warn(
+          `[SKIP] Rewrite failed completely for "${rawArticle.title}"`
+        );
+        stats.articlesRejected++;
+        continue;
+      }
+
+      // Calculate quality score
+      const qualityScore = scoreArticleQuality(data);
+      console.log(`[QUALITY] Article scored: ${qualityScore}/100`);
+
+      // Only save high-quality content
+      if (qualityScore < 60) {
+        console.warn(
+          `[QUALITY] Article rejected due to low score: ${qualityScore}/100`
+        );
+        stats.articlesRejected++;
+        continue;
+      }
+
+      try {
+        // Create article with all possible fields
+        const savedArticle = await Article.create({
+          title: data.title || rawArticle.title,
+          original: rawArticle.content || rawArticle.description || "",
+          content: data.rewritten,
+          summary: data.summary,
+          tags: data.tags,
+          citations: data.citations || [
+            {
+              title: rawArticle.source?.name || "Original Source",
+              url: rawArticle.url || "",
+            },
+          ],
+          author: reporter.name,
+          voiceId: reporter.voiceId,
+          topic: data.topic,
+          category: data.category || "Editorial",
+          sourceUrl: rawArticle.url,
+          photoCredit: data.photoCredit || rawArticle.source?.name || "",
+          quotes: data.quotes || [],
+          status: "draft",
+          createdAt: new Date(),
+        });
+
+        // Update reporter statistics
+        updateReporterStats(reporter, data, qualityScore);
+        stats.articlesProcessed++;
+
+        console.log(
+          `[CRON] ✅ Staged article by ${reporter.name}: "${
+            data.title || rawArticle.title
+          }"`
+        );
+
+        // Send email notification about the new article
+        try {
+          await sendArticleNotification(savedArticle, reporter);
+          console.log(
+            `[EMAIL] Notification sent for article "${savedArticle.title}"`
+          );
+        } catch (emailErr) {
+          console.error(
+            `[EMAIL] Failed to send notification: ${emailErr.message}`
+          );
+        }
+      } catch (err) {
+        console.error(
+          `[ERROR] Failed to save article "${rawArticle.title}":`,
+          err.message
+        );
+        stats.articlesRejected++;
+
+        // Log the exact Mongoose validation error for debugging
+        if (err.name === "ValidationError") {
+          for (const field in err.errors) {
+            console.error(`- ${field}: ${err.errors[field].message}`);
+          }
+        }
+      }
+    }
+  }
+
+  // Save stats at the end of job
+  await saveStats();
+
+  console.log(`[CRON] Job Summary:
+    Topics: ${selectedTopics.join(", ")}
+    Articles fetched: ${stats.articlesFetched}
+    Articles processed: ${stats.articlesProcessed}
+    Articles rejected: ${stats.articlesRejected}
+    Estimated cost: ${stats.totalCost.toFixed(4)}
+  `);
+}
+
+function scheduleJobs() {
+  // Initialize cache when the server starts
+  initializeCache();
+
+  // Schedule to run at 8am and 6pm UTC
+  cron.schedule("0 8,18 * * *", async () => {
+    try {
+      console.log("[CRON] Scheduled job running...");
+      await runJob();
+      console.log("[CRON] Job complete.");
+    } catch (err) {
+      console.error("[CRON ERROR]:", err.message);
+    }
+  });
+
+  console.log("[CRON] Job scheduled to run at 8am and 6pm UTC");
 }
 
 module.exports = {
