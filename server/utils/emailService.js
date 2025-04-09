@@ -1,41 +1,70 @@
-// server/utils/emailService.js
 const nodemailer = require("nodemailer");
+const fs = require("fs");
+const path = require("path");
 
-// Function to send article notifications
 const sendArticleNotification = async (article, reporter) => {
   try {
-    // Check if email is configured
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-      console.log("[EMAIL] Skipping email notification - email not configured");
+    const {
+      EMAIL_USER,
+      EMAIL_PASSWORD,
+      EMAIL_HOST,
+      EMAIL_PORT,
+      EMAIL_SECURE,
+      EMAIL_FROM,
+      EMAIL_RECIPIENT,
+      SITE_URL,
+      EMAIL_ALLOW_SELF_SIGNED,
+      NODE_ENV,
+    } = process.env;
+
+    const isProd = NODE_ENV === "production";
+
+    // Basic config validation
+    if (!EMAIL_USER || !EMAIL_PASSWORD) {
+      console.log("[EMAIL] Skipping notification - email credentials missing");
       return null;
     }
 
-    // Configure email transporter
-    const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST || "smtp.gmail.com",
-      port: parseInt(process.env.EMAIL_PORT || "587"),
-      secure: process.env.EMAIL_SECURE === "true",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+    if (!EMAIL_RECIPIENT) {
+      console.log("[EMAIL] Skipping notification - no recipient configured");
+      return null;
+    }
+
+    if (!SITE_URL && isProd) {
+      console.warn("[EMAIL] Warning: SITE_URL is not defined in production");
+    }
+
+    // Conditionally add TLS settings for dev
+    const tlsOptions =
+      EMAIL_ALLOW_SELF_SIGNED === "true" && !isProd
+        ? { rejectUnauthorized: false }
+        : undefined;
+
+    // Configure transporter
+    const transporter = nodemailer.createTransport(
+      {
+        host: EMAIL_HOST || "smtp.gmail.com",
+        port: parseInt(EMAIL_PORT || "587", 10),
+        secure: EMAIL_SECURE === "true", // true for port 465
+        auth: {
+          user: EMAIL_USER,
+          pass: EMAIL_PASSWORD,
+        },
+        ...(tlsOptions ? { tls: tlsOptions } : {}),
       },
-    });
+      {
+        logger: !isProd,
+        debug: !isProd,
+      }
+    );
 
-    // Check if recipient is configured
-    const recipient = process.env.EMAIL_RECIPIENT;
-    if (!recipient) {
-      console.log(
-        "[EMAIL] Skipping email notification - no recipient configured"
-      );
-      return null;
-    }
+    const baseUrl =
+      SITE_URL ||
+      (!isProd ? "http://localhost:3000" : "https://solounderground.com");
 
-    // Create email content
     const mailOptions = {
-      from:
-        process.env.EMAIL_FROM ||
-        `"Solo Underground" <${process.env.EMAIL_USER}>`,
-      to: recipient,
+      from: EMAIL_FROM || `"Solo Underground" <${EMAIL_USER}>`,
+      to: EMAIL_RECIPIENT,
       subject: `New Article Draft: "${article.title}"`,
       html: `
         <h2>New Article Draft by ${reporter.name}</h2>
@@ -46,19 +75,37 @@ const sendArticleNotification = async (article, reporter) => {
         <p><strong>Category:</strong> ${article.category || "Uncategorized"}</p>
         <p><strong>Topic:</strong> ${article.topic || "General"}</p>
         <hr>
-        <p>To review and publish this article, <a href="${
-          process.env.SITE_URL || "http://localhost:3000"
-        }/admin/edit/${article._id}">click here</a>.</p>
+        <p>To review and publish this article, <a href="${baseUrl}/admin/edit/${
+        article._id
+      }">click here</a>.</p>
       `,
     };
 
-    // Send email
     const info = await transporter.sendMail(mailOptions);
     console.log("[EMAIL] Notification sent, ID:", info.messageId);
     return info;
   } catch (error) {
     console.error("[EMAIL] Error sending notification:", error.message);
-    // Don't throw - this should not stop the article creation process
+
+    // Fallback logging
+    try {
+      const logsDir = path.join(__dirname, "../logs");
+      const fallbackLogPath = path.join(logsDir, "email-failures.log");
+
+      if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true });
+      }
+
+      const logEntry = `[${new Date().toISOString()}] Failed to send email for article "${
+        article?.title
+      }" by ${reporter?.name} - ${error.message}\n`;
+
+      fs.appendFileSync(fallbackLogPath, logEntry);
+      console.log(`[EMAIL] Logged failure to ${fallbackLogPath}`);
+    } catch (logErr) {
+      console.error("[EMAIL] Failed to write to fallback log:", logErr.message);
+    }
+
     return null;
   }
 };

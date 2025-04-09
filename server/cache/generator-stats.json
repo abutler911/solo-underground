@@ -1,8 +1,8 @@
 {
-  "articlesFetched": 5,
+  "articlesFetched": 1,
   "articlesProcessed": 1,
   "articlesRejected": 0,
-  "totalCost": 0.00099,
+  "totalCost": 0.00096,
   "reporterStats": {
     "Cade Vox": {
       "articlesWritten": 0,
@@ -14,11 +14,11 @@
     "Juno Blaze": {
       "articlesWritten": 1,
       "avgQualityScore": 64,
-      "avgWordCount": 191,
+      "avgWordCount": 256,
       "topicsCovered": {
-        "US politics": 1
+        "AI ethics": 1
       },
-      "lastUsed": "2025-04-08T15:10:22.645Z"
+      "lastUsed": "2025-04-09T14:22:18.750Z"
     },
     "Dex Rawlins": {
       "articlesWritten": 0,
@@ -63,5 +63,5 @@
       "lastUsed": null
     }
   },
-  "lastUpdated": "2025-04-08T15:09:10.558Z"
+  "lastUpdated": "2025-04-09T14:20:00.465Z"
 }
