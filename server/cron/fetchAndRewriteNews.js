@@ -167,7 +167,7 @@ async function isDuplicateArticle(article) {
 }
 
 // Read or create RSS cache
-async function getRssCache() {
+async function getRssCache(stats = null) {
   try {
     const data = await fs.readFile(RSS_CACHE_FILE, "utf8");
     const cache = JSON.parse(data);
@@ -177,13 +177,20 @@ async function getRssCache() {
     const now = new Date();
     const hoursSinceCache = (now - cacheTime) / (1000 * 60 * 60);
 
-    if (hoursSinceCache < 24) {
+    // 🧠 Smart refresh: if cache is over 12h old and we had 0 articles published in the last run
+    if (
+      hoursSinceCache < 12 ||
+      (hoursSinceCache < 24 && stats?.articlesProcessed > 0)
+    ) {
       console.log(
         `[CACHE] Using RSS cache from ${hoursSinceCache.toFixed(1)} hours ago`
       );
       return cache.articles;
     }
-    console.log("[CACHE] Cache expired, fetching fresh RSS feeds");
+
+    console.log(
+      "[CACHE] Cache expired or refresh triggered by low article count"
+    );
     return null;
   } catch (err) {
     console.log("[CACHE] No valid cache found, fetching fresh RSS feeds");
@@ -266,7 +273,8 @@ async function classifyTopicRelevance(article, topic) {
 
 async function fetchArticlesFromRSS(topic) {
   // Check cache first
-  const cachedArticles = await getRssCache();
+  const cachedArticles = await getRssCache(stats);
+
   if (cachedArticles) {
     // If we have cached articles, filter by topic and return
     const topicFiltered = [];
@@ -773,7 +781,32 @@ async function runJob() {
       console.log(`[CRON] Selected reporter: ${reporter.name}`);
 
       // Rewrite the article
-      const data = await rewriteArticle(rawArticle, reporter);
+      let data = null;
+      let retryCount = 0;
+      const maxRetries = 3;
+      const retryDelay = 3000; // in ms
+
+      while (!data && retryCount < maxRetries) {
+        data = await rewriteArticle(rawArticle, reporter);
+
+        if (!data) {
+          retryCount++;
+          console.warn(
+            `[RETRY] Rewrite attempt ${retryCount} failed for "${rawArticle.title}"`
+          );
+          if (retryCount < maxRetries) {
+            await new Promise((resolve) => setTimeout(resolve, retryDelay));
+          }
+        }
+      }
+
+      if (!data) {
+        console.warn(
+          `[SKIP] Rewrite ultimately failed after ${maxRetries} attempts for "${rawArticle.title}"`
+        );
+        stats.articlesRejected++;
+        continue;
+      }
 
       // Skip if rewrite failed
       if (!data) {
