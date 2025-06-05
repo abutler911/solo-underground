@@ -10,7 +10,6 @@ const ArticleSchema = new mongoose.Schema(
     category: { type: String },
     coverImage: { type: String },
     photoCredit: { type: String },
-
     quotes: [
       {
         text: { type: String, required: true },
@@ -31,6 +30,7 @@ const ArticleSchema = new mongoose.Schema(
     ],
     published: { type: Boolean, default: false },
     publishedAt: { type: Date },
+    originalDate: { type: Date },
     status: {
       type: String,
       enum: ["draft", "published", "needs-rewrite"],
