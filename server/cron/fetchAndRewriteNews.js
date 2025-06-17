@@ -949,21 +949,32 @@ async function runJob() {
 }
 
 function scheduleJobs() {
-  // Initialize cache when the server starts
   initializeCache();
 
-  // Schedule to run at 6am and 12pm Mountain Time (12pm and 6pm UTC during DST)
-  cron.schedule("0 12,18 * * *", async () => {
-    try {
-      console.log("[CRON] Scheduled job running...");
-      await runJob();
-      console.log("[CRON] Job complete.");
-    } catch (err) {
-      console.error("[CRON ERROR]:", err.message);
-    }
+  const cronTimes = [
+    "0 8 * * *", // 2:00 AM MT
+    "0 12 * * *", // 6:00 AM MT
+    "0 16 * * *", // 10:00 AM MT
+    "0 20 * * *", // 2:00 PM MT
+    "0 0 * * *", // 6:00 PM MT (next day UTC)
+    "0 4 * * *", // 10:00 PM MT (next day UTC)
+  ];
+
+  cronTimes.forEach((cronTime) => {
+    cron.schedule(cronTime, async () => {
+      try {
+        console.log(`[CRON] Scheduled job running at UTC ${cronTime}...`);
+        await runJob();
+        console.log("[CRON] Job complete.");
+      } catch (err) {
+        console.error("[CRON ERROR]:", err.message);
+      }
+    });
   });
 
-  console.log("[CRON] Job scheduled to run at 6am and 12pm Mountain Time");
+  console.log(
+    "[CRON] Jobs scheduled for 2am, 6am, 10am, 2pm, 6pm, and 10pm MT (adjusted for UTC)"
+  );
 }
 
 module.exports = {

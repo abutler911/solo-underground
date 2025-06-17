@@ -1,5 +1,6 @@
 const express = require("express");
-const fs = require("fs");
+const fs = require("fs/promises");
+
 const path = require("path");
 const router = express.Router();
 
@@ -10,7 +11,8 @@ const PERFORMANCE_FILE = path.join(
 
 router.get("/", async (req, res) => {
   try {
-    const raw = await fs.promises.readFile(PERFORMANCE_FILE, "utf8");
+    const raw = await fs.readFile(PERFORMANCE_FILE, "utf8");
+
     const stats = JSON.parse(raw);
 
     res.json({
