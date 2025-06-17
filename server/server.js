@@ -6,6 +6,7 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 require("dotenv").config();
 const { runJob } = require("./cron/fetchAndRewriteNews");
+const adminStatsRoute = require("./routes/adminStats");
 
 // Import routes
 const articlesRoutes = require("./routes/articles");
@@ -101,6 +102,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/articles", articlesRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/stats", adminStatsRoute);
 
 app.get("/api/test-cron", async (req, res) => {
   try {

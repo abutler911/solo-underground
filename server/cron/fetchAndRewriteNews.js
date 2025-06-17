@@ -51,6 +51,8 @@ function initReporterStats() {
         avgWordCount: 0,
         topicsCovered: {},
         lastUsed: null,
+        topicsCovered: {},
+        perTopicScore: {},
       };
     }
   }
@@ -712,6 +714,12 @@ function updateReporterStats(reporter, articleData, qualityScore) {
   const topic = articleData.topic;
   reporterStats.topicsCovered[topic] =
     (reporterStats.topicsCovered[topic] || 0) + 1;
+
+  if (!reporterStats.perTopicScore[topic]) {
+    reporterStats.perTopicScore[topic] = { totalScore: 0, articles: 0 };
+  }
+  reporterStats.perTopicScore[topic].totalScore += qualityScore;
+  reporterStats.perTopicScore[topic].articles += 1;
 }
 
 // Save stats to file
@@ -913,6 +921,23 @@ async function runJob() {
 
   // Save stats at the end of job
   await saveStats();
+  await saveReporterPerformance();
+
+  async function saveReporterPerformance() {
+    try {
+      const statsFile = path.join(CACHE_DIR, "reporter-performance.json");
+      await fs.writeFile(
+        statsFile,
+        JSON.stringify(stats.reporterStats, null, 2)
+      );
+      console.log("[STATS] Reporter performance saved.");
+    } catch (err) {
+      console.error(
+        "[STATS] Failed to save reporter performance:",
+        err.message
+      );
+    }
+  }
 
   console.log(`[CRON] Job Summary:
     Topics: ${selectedTopics.join(", ")}
