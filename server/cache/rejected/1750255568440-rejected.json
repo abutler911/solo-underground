@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-06-18T14:06:08.440Z",
+  "reason": "Validation failed: Too few words",
+  "score": 0,
+  "original": {
+    "title": "Are robotaxis ready for their S-curve takeoff? Waymo's driver-free fleet is expanding in California, and it claims it can improve them further.",
+    "description": "If they are adopted like most other technologies robotaxis will follow an S-curve. For a while, there will be a small number of them, and then they will very rapidly expand until they are everywhere. When will robotaxis reach the take-off phase?\n\nIt's possible it could be very soon. The evidence?\n\nWaymo's robotaxis are safely operating in California and expanding into more areas. Simultaneously, Waymo says they have cracked key insights into maki",
+    "content": "If they are adopted like most other technologies robotaxis will follow an S-curve. For a while, there will be a small number of them, and then they will very rapidly expand until they are everywhere. When will robotaxis reach the take-off phase?\n\nIt's possible it could be very soon. The evidence?\n\nWaymo's robotaxis are safely operating in California and expanding into more areas. Simultaneously, Waymo says they have cracked key insights into making them much better than they already are in 2025.\n\n[Waymo robotaxis are pushing into even more California cities](https://techcrunch.com/2025/06/17/waymo-robotaxis-are-pushing-into-even-more-california-cities/)\n\n\n[New Insights for Scaling Laws in Autonomous Driving](https://waymo.com/blog/2025/06/scaling-laws-in-autonomous-driving)",
+    "url": "https://www.reddit.com/r/Futurology/comments/1ledhak/are_robotaxis_ready_for_their_scurve_takeoff/",
+    "pubDate": "Wed, 18 Jun 2025 10:18:15 GMT",
+    "source": {
+      "name": "r/Futurology"
+    }
+  },
+  "rewritten": {
+    "title": "Robotaxis: On the Brink of an S-Curve Explosion?",
+    "rewritten": "<p>Are we about to witness the explosive growth of robotaxis? If we follow the trajectory of most technology adoptions, we're on the cusp of an S-curve explosion. For a while, there will be a small number of them, and then they will very rapidly expand until they are everywhere. The evidence? Waymo's robotaxis are safely operating in California and expanding into more areas. Simultaneously, Waymo says they have cracked key insights into making them much better than they already are.</p><p>When will robotaxis reach the take-off phase? It's possible it could be very soon. The signs are all there - Waymo's robotaxis are not only expanding their reach but also improving their capabilities. The company claims to have gained key insights that will allow them to improve their autonomous vehicles significantly by 2025.</p><blockquote>Waymo's robotaxis are pushing into even more California cities.</blockquote><p>But the question remains: Are we ready for this transportation revolution? The adoption of new technologies often comes with its own set of challenges. Safety, regulations, and public acceptance are all factors that could potentially slow down the S-curve. However, if Waymo's claims hold true, we could be seeing a lot more robotaxis on our roads in the near future.</p><blockquote>New Insights for Scaling Laws in Autonomous Driving.</blockquote><p>It's an exciting time to be alive. The future of transportation is unfolding right before our eyes. So, buckle up and get ready for the ride. The robotaxis are coming, and they're coming fast.</p>",
+    "summary": "Waymo's robotaxis are expanding in California and the company claims they can improve them further. This could indicate the beginning of an S-curve growth for robotaxis, a rapid expansion following initial slow adoption.",
+    "tags": [
+      "robotaxis",
+      "waymo",
+      "s-curve",
+      "transportation",
+      "technology"
+    ],
+    "topic": "Technology",
+    "category": "Op-Ed"
+  },
+  "config": {
+    "minQualityScore": 30,
+    "minWordCount": 350
+  }
+}

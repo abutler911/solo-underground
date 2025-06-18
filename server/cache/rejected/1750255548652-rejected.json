@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-06-18T14:05:48.652Z",
+  "reason": "Validation failed: Too few words",
+  "score": 0,
+  "original": {
+    "title": "In 'Hysterical,' a podcaster unpacks a mysterious contagious illness among teen girls",
+    "description": "Dan Taberski won a \"Podcast of the Year\" award for his investigation of a 2011 outbreak of tics and spasms in one high school. He's also the creator of the \"Missing Richard Simmons\" podcast.",
+    "content": "function OptanonWrapper() { NPR_OptanonWrapper = true; document.dispatchEvent(new CustomEvent('npr:DataConsentAvailable')); OneTrust.OnConsentChanged(function() { document.dispatchEvent(new CustomEvent('npr:DataConsentChanged')); }); } document.cookie = \"__adblocker=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/\"; var setNptTechAdblockerCookie = function(adblocker) { var d = new Date(); d.setTime(d.getTime() + 60 * 5 * 1000); document.cookie = \"__adblocker=\" + (adblocker ? \"true\" : \"false\") + \"; expires=\" + d.toUTCString() + \"; path=/\"; }; var script = document.createElement(\"script\"); script.setAttribute(\"async\", true); script.setAttribute(\"src\", \"//www.npttech.com/advertising.js\"); script.setAttribute(\"onerror\", \"setNptTechAdblockerCookie(true);\"); document.getElementsByTagName(\"head\")[0].appendChild(script); !function(a9,a,p,s,t,A,g){if(a[a9])return;function q(c,r){a[a9]._Q.push([c,r])}a[a9]={init:function(){q(\"i\",arguments)},fetchBids:function(){q(\"f\",arguments)},setDisplayBids:function(){},targetingKeys:function(){return[]},_Q:[]};A=p.createElement(s);A.async=!0;A.src=t;g=p.getElementsByTagName(s)[0];g.parentNode.insertBefore(A,g)}(\"apstag\",window,document,\"script\",\"//c.amazon-adsystem.com/aax2/apstag.js\"); (function (e, o, n, i) { if (!e) { e = e || {}, window.permutive = e, e.q = []; var t = function () { return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, function (e) { return (e ^ (window.crypto || window.msCrypto).getRandomValues(new Uint8Array(1))[0] & 1",
+    "url": "https://www.npr.org/2025/06/18/nx-s1-5436663/in-hysterical-a-podcaster-unpacks-a-mysterious-contagious-illness-among-teen-girls",
+    "pubDate": "Wed, 18 Jun 2025 09:00:00 -0400",
+    "source": {
+      "name": "NPR Topics: News"
+    }
+  },
+  "rewritten": {
+    "title": "The Unraveling of a Teenage Epidemic: A Podcast's Deep Dive into Mystery",
+    "rewritten": "<p>When an unexplained outbreak of tics and spasms seized a high school in 2011, it took a podcaster to delve into the depths of the mystery. Dan Taberski, the award-winning creator of the 'Missing Richard Simmons' podcast, has once again demonstrated his knack for investigative storytelling with 'Hysterical.'</p><p>'Hysterical' is more than just a podcast; it's an exploration into the unknown, a journey into a medical mystery that left experts baffled and a community in fear. Taberski's investigation into the outbreak, which won him the 'Podcast of the Year' award, is a testament to his skill as a storyteller and his commitment to shedding light on the unexplained.</p><p>But what makes 'Hysterical' truly compelling is Taberski's ability to humanize the story. He takes us beyond the symptoms and the science, into the lives of the affected girls, their families, and their community. It's a reminder that behind every headline, there are real people grappling with real issues.</p><blockquote>\"When an unexplained outbreak of tics and spasms seized a high school in 2011, it took a podcaster to delve into the depths of the mystery.\"</blockquote><blockquote>\"'Hysterical' is more than just a podcast; it's an exploration into the unknown, a journey into a medical mystery that left experts baffled and a community in fear.\"</blockquote><p>As we listen to 'Hysterical,' we are reminded of the power of storytelling in unraveling the mysteries of our world. And as we ponder the strange case of the teenage epidemic, we are left with a sense of awe at the resilience of those who face adversity, and the tenacity of those who seek to understand it.</p>",
+    "summary": "Dan Taberski's 'Hysterical' podcast investigates a 2011 outbreak of tics and spasms in a high school, earning him a 'Podcast of the Year' award.",
+    "tags": [
+      "podcast",
+      "investigation",
+      "mystery",
+      "teenage epidemic",
+      "dan taberski"
+    ],
+    "topic": "News",
+    "category": "Op-Ed"
+  },
+  "config": {
+    "minQualityScore": 30,
+    "minWordCount": 350
+  }
+}

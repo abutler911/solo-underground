@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-06-18T14:11:23.319Z",
+  "reason": "Validation failed: Too few words",
+  "score": 0,
+  "original": {
+    "title": "A battle of sounds stops at the inter-Korean border",
+    "description": "The two Koreas have engaged in psychological warfare since the 1960s, with weapons like huge billboard screens, loudspeakers installed along the border, and airdropping propaganda leaflets.",
+    "content": "function OptanonWrapper() { NPR_OptanonWrapper = true; document.dispatchEvent(new CustomEvent('npr:DataConsentAvailable')); OneTrust.OnConsentChanged(function() { document.dispatchEvent(new CustomEvent('npr:DataConsentChanged')); }); } document.cookie = \"__adblocker=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/\"; var setNptTechAdblockerCookie = function(adblocker) { var d = new Date(); d.setTime(d.getTime() + 60 * 5 * 1000); document.cookie = \"__adblocker=\" + (adblocker ? \"true\" : \"false\") + \"; expires=\" + d.toUTCString() + \"; path=/\"; }; var script = document.createElement(\"script\"); script.setAttribute(\"async\", true); script.setAttribute(\"src\", \"//www.npttech.com/advertising.js\"); script.setAttribute(\"onerror\", \"setNptTechAdblockerCookie(true);\"); document.getElementsByTagName(\"head\")[0].appendChild(script); !function(a9,a,p,s,t,A,g){if(a[a9])return;function q(c,r){a[a9]._Q.push([c,r])}a[a9]={init:function(){q(\"i\",arguments)},fetchBids:function(){q(\"f\",arguments)},setDisplayBids:function(){},targetingKeys:function(){return[]},_Q:[]};A=p.createElement(s);A.async=!0;A.src=t;g=p.getElementsByTagName(s)[0];g.parentNode.insertBefore(A,g)}(\"apstag\",window,document,\"script\",\"//c.amazon-adsystem.com/aax2/apstag.js\"); (function (e, o, n, i) { if (!e) { e = e || {}, window.permutive = e, e.q = []; var t = function () { return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, function (e) { return (e ^ (window.crypto || window.msCrypto).getRandomValues(new Uint8Array(1))[0] & 1",
+    "url": "https://www.npr.org/2025/06/18/g-s1-73286/battle-of-sounds-inter-korean-border",
+    "pubDate": "Wed, 18 Jun 2025 06:06:46 -0400",
+    "source": {
+      "name": "NPR Topics: News"
+    },
+    "_retry": true
+  },
+  "rewritten": {
+    "title": "Sound Wars: The Silent Battle at the Inter-Korean Border",
+    "rewritten": "<p>It's a clash of decibels at the inter-Korean border, a battleground not of bullets and bombs, but of sounds and silence. The two Koreas have been locked in a psychological sonic warfare since the 1960s, a war fought with weapons as unconventional as huge billboard screens, loudspeakers installed along the border, and airdropped propaganda leaflets.</p><p>These tools of psychological warfare are not new, but their use in the inter-Korean conflict is a stark reminder of the lingering tensions that persist between the two nations. The loudspeakers, for instance, blast messages across the border, a sonic barrage aimed at swaying the minds and hearts of those within earshot.</p><blockquote>\"It's not just about the noise, it's about the message. It's a battle of ideologies, played out at maximum volume.\"</blockquote><p>Similarly, the billboard screens and leaflets serve the same purpose, delivering messages designed to undermine the opposition and bolster the sender's own narrative. It's a war of words and images, a battle for the minds of the people.</p><blockquote>\"In this silent war, the loudest weapon is the truth. And in the battle of sounds, silence can be just as powerful.\"</blockquote><p>This psychological warfare, while less deadly than its physical counterpart, is no less important. It's a war that's been waged for over half a century, and it shows no signs of stopping. As long as the two Koreas remain at odds, the battle of sounds will continue to echo along the border, a constant reminder of the ideological divide that separates them.</p><p>And so, the silent war rages on, a battle of sounds and silence, of messages and ideologies. It's a war fought not on the battlefield, but in the minds of the people, a war that's as much about perception as it is about reality.</p>",
+    "summary": "The two Koreas have been engaged in psychological warfare since the 1960s, using unconventional weapons like billboard screens, loudspeakers, and airdropped propaganda leaflets. This silent war, a battle of sounds and silence, continues to echo along the border, a constant reminder of the ideological divide between the two nations.",
+    "tags": [
+      "inter-korean border",
+      "psychological warfare",
+      "propaganda",
+      "ideological divide"
+    ],
+    "topic": "International Relations",
+    "category": "Op-Ed"
+  },
+  "config": {
+    "minQualityScore": 30,
+    "minWordCount": 350
+  }
+}

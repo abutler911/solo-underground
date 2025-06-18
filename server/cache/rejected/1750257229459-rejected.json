@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-06-18T14:33:49.459Z",
+  "reason": "Validation failed: Too few words",
+  "score": 0,
+  "original": {
+    "title": "Working hard for what, exactly ?",
+    "description": "I’ve been grinding, learning, doing everything I’m “supposed” to do to build a career. But with how fast AI is advancing, I keep thinking… what’s the point?\n\nAI is already doing things that used to take people years to master writing, coding, designing, even decision making. It feels like no matter how hard I work, the goalposts keep moving. Whole career paths are getting swallowed up before they even fully begin.\n\nI’m not afraid of work. I just ",
+    "content": "I’ve been grinding, learning, doing everything I’m “supposed” to do to build a career. But with how fast AI is advancing, I keep thinking… what’s the point?\n\nAI is already doing things that used to take people years to master writing, coding, designing, even decision making. It feels like no matter how hard I work, the goalposts keep moving. Whole career paths are getting swallowed up before they even fully begin.\n\nI’m not afraid of work. I just want the work to matter.  \nAnyone else feel like they’re putting everything into a future that might not even have a place for them?",
+    "url": "https://www.reddit.com/r/Futurology/comments/1ldjbjk/working_hard_for_what_exactly/",
+    "pubDate": "Tue, 17 Jun 2025 10:09:19 GMT",
+    "source": {
+      "name": "r/Futurology"
+    }
+  },
+  "rewritten": {
+    "title": "AI Advancement: A Race Against Relevance or a Call for Adaptation?",
+    "rewritten": "In the face of rapid AI advancement, many are questioning the worth of their hard work and the future of their careers. AI is mastering skills that once took humans years to learn, such as writing, coding, and decision making, and it feels like the goalposts are constantly moving. This has led to a sense of disillusionment, with some fearing that their efforts may be in vain as they strive for a future that may not have a place for them. However, this should not be a cause for despair, but rather a call for adaptation and continuous learning.<p>AI is not the enemy. It is a tool, and like any tool, its impact depends on how we use it. The fear of AI taking over jobs is not new. It's a fear that has been present with every major technological advancement. However, history has shown us that while technology can displace certain jobs, it also creates new ones in its wake.</p><p>AI's rapid advancement is indeed changing the landscape of work, but it's not making human effort irrelevant. Rather, it's shifting the kind of work that's valued. The goalposts haven't disappeared; they've just moved. And it's up to us to adapt and move with them.</p><p>Instead of fearing AI, we should embrace it. We should view it as an opportunity to learn new skills and expand our horizons. The future of work may be uncertain, but one thing is sure: those who adapt will thrive.</p><p>So, keep grinding, keep learning. Your work does matter. It's just a matter of finding where it fits in this new world. And remember, the only constant in life is change. Embrace it, adapt, and you will find your place.</p>",
+    "summary": "As AI rapidly advances, many fear their efforts in building a career may be futile. However, this should not be a cause for despair, but a call for adaptation. AI is not making human effort irrelevant; it's shifting the kind of work that's valued. Embrace AI, learn new skills, and find where your work fits in this new world.",
+    "tags": [
+      "ai",
+      "future of work",
+      "adaptation",
+      "career",
+      "technology"
+    ],
+    "topic": "AI",
+    "category": "Op-Ed"
+  },
+  "config": {
+    "minQualityScore": 30,
+    "minWordCount": 350
+  }
+}

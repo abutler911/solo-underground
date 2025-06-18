@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "babel-plugin-styled-components": "^2.1.4"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0"
   }
 }

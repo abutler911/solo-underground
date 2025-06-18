@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-06-18T15:44:28.598Z",
+  "reason": "Validation failed: Too few words",
+  "score": 0,
+  "original": {
+    "title": "c/futurology extra content - up to 11th May",
+    "description": "[Uber finds another AI robotaxi partner in Momenta, driverless rides to begin in Europe](https://futurology.today/post/4662956)\n\n[AI is Making You Dumber. Here's why.](https://futurology.today/post/4598819?)\n\n[As NASA pivots to skipping the Moon to land people on Mars, China says it's narrowing down the site for its Lunar Base.](https://futurology.today/post/4701519)\n\n[A.I. Is Getting More Powerful, but Its Hallucinations Are Getting Worse: A new",
+    "content": "[Uber finds another AI robotaxi partner in Momenta, driverless rides to begin in Europe](https://futurology.today/post/4662956)\n\n[AI is Making You Dumber. Here's why.](https://futurology.today/post/4598819?)\n\n[As NASA pivots to skipping the Moon to land people on Mars, China says it's narrowing down the site for its Lunar Base.](https://futurology.today/post/4701519)\n\n[A.I. Is Getting More Powerful, but Its Hallucinations Are Getting Worse: A new wave of “reasoning” systems is producing incorrect information more often. Even the companies don’t know why.](https://futurology.today/post/4661794)\n\n[The US has approved CRISPR pigs for food: Pigs whose DNA makes them resistant to a virus could be the first big consumer product using gene editing.](https://futurology.today/post/4632159)\n\n[UK scientists to tackle AI's surging energy costs with atom-thin semiconductors](https://futurology.today/post/4613090)\n\n[Universal Basic Income: Costs, Critiques, and Future Solutions](https://futurology.today/post/4578653)\n\n[Cryptocurrency may be evolving into a shadow banking system](https://futurology.today/post/4578384)\n\n[Hypershell X is a $999 AI-powered exoskeleton that says it makes hiking, running and walking 30% easier.](https://futurology.today/post/4555154)",
+    "url": "https://www.reddit.com/r/Futurology/comments/1kk96r7/cfuturology_extra_content_up_to_11th_may/",
+    "pubDate": "Sun, 11 May 2025 19:30:35 GMT",
+    "source": {
+      "name": "r/Futurology"
+    }
+  },
+  "rewritten": {
+    "title": "The Future is Now: A Dive into the Unsettling and Exciting World of AI and Futurology",
+    "rewritten": "<p>As we hurtle towards the future, the line between science fiction and reality blurs. The technological leaps we are witnessing today, from AI-driven taxis to gene-edited pigs, are both exhilarating and disconcerting.</p><p>Uber's recent partnership with Momenta to launch driverless rides in Europe is a testament to the rapid advancements in AI. Yet, as these autonomous vehicles hit the roads, we must also grapple with the unsettling fact that AI is becoming more powerful and its 'hallucinations' are getting worse. The reasoning systems are producing incorrect information more often, and alarmingly, even the companies don't know why.</p><p>Meanwhile, as NASA pivots to Mars, China is zeroing in on the Moon. The space race is not just about exploration, but also about geopolitical power and influence. As these superpowers chart their celestial paths, the implications for international relations on Earth are profound.</p><p>Back on Earth, the UK is tackling AI's surging energy costs with atom-thin semiconductors, a development that could redefine the tech industry's approach to sustainability. At the same time, the US has approved CRISPR pigs for food, marking a significant step in the consumer application of gene editing.</p><p>As we navigate this brave new world, it's crucial that we consider the ethical, environmental, and societal implications of these advancements. The future is now, and it's up to us to shape it.</p><blockquote>\"The future is now, and it's up to us to shape it.\"</blockquote><blockquote>\"As we navigate this brave new world, it's crucial that we consider the ethical, environmental, and societal implications of these advancements.\"</blockquote>",
+    "summary": "This op-ed discusses recent developments in AI and futurology, including Uber's partnership with Momenta, AI's 'hallucinations', the space race between NASA and China, the UK's approach to AI's energy costs, and the approval of CRISPR pigs for food in the US.",
+    "tags": [
+      "ai",
+      "futurology",
+      "uber",
+      "nasa",
+      "crispr"
+    ],
+    "topic": "Technology",
+    "category": "Op-Ed"
+  },
+  "config": {
+    "minQualityScore": 30,
+    "minWordCount": 250
+  }
+}

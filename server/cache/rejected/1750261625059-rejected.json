@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-06-18T15:47:05.059Z",
+  "reason": "Validation failed: Too few words",
+  "score": 0,
+  "original": {
+    "title": "c/futurology extra content - up to 11th May",
+    "description": "[Uber finds another AI robotaxi partner in Momenta, driverless rides to begin in Europe](https://futurology.today/post/4662956)\n\n[AI is Making You Dumber. Here's why.](https://futurology.today/post/4598819?)\n\n[As NASA pivots to skipping the Moon to land people on Mars, China says it's narrowing down the site for its Lunar Base.](https://futurology.today/post/4701519)\n\n[A.I. Is Getting More Powerful, but Its Hallucinations Are Getting Worse: A new",
+    "content": "[Uber finds another AI robotaxi partner in Momenta, driverless rides to begin in Europe](https://futurology.today/post/4662956)\n\n[AI is Making You Dumber. Here's why.](https://futurology.today/post/4598819?)\n\n[As NASA pivots to skipping the Moon to land people on Mars, China says it's narrowing down the site for its Lunar Base.](https://futurology.today/post/4701519)\n\n[A.I. Is Getting More Powerful, but Its Hallucinations Are Getting Worse: A new wave of “reasoning” systems is producing incorrect information more often. Even the companies don’t know why.](https://futurology.today/post/4661794)\n\n[The US has approved CRISPR pigs for food: Pigs whose DNA makes them resistant to a virus could be the first big consumer product using gene editing.](https://futurology.today/post/4632159)\n\n[UK scientists to tackle AI's surging energy costs with atom-thin semiconductors](https://futurology.today/post/4613090)\n\n[Universal Basic Income: Costs, Critiques, and Future Solutions](https://futurology.today/post/4578653)\n\n[Cryptocurrency may be evolving into a shadow banking system](https://futurology.today/post/4578384)\n\n[Hypershell X is a $999 AI-powered exoskeleton that says it makes hiking, running and walking 30% easier.](https://futurology.today/post/4555154)",
+    "url": "https://www.reddit.com/r/Futurology/comments/1kk96r7/cfuturology_extra_content_up_to_11th_may/",
+    "pubDate": "Sun, 11 May 2025 19:30:35 GMT",
+    "source": {
+      "name": "r/Futurology"
+    }
+  },
+  "rewritten": {
+    "title": "The Future is Now: A Dive into the World of Futurology",
+    "rewritten": "<p>As we venture further into the 21st century, the realm of futurology is becoming increasingly relevant. From AI-powered taxis to the potential of gene-edited food, we are living in a world that once seemed confined to the pages of science fiction.</p><p>Uber's partnership with Momenta marks another step towards a future of driverless vehicles. However, as AI becomes more powerful, it's also becoming more unpredictable. As these systems produce incorrect information more frequently, we must question the reliability of our automated future.</p><p>Meanwhile, the space race takes a new turn. As NASA shifts its focus to Mars, China is narrowing down the site for its Lunar Base. The moon, once a symbol of American achievement, may soon bear the flag of another nation.</p><p>On Earth, scientists are tackling AI's surging energy costs with atom-thin semiconductors. Yet, as technology advances, so do its implications. Cryptocurrency, for instance, may be evolving into a shadow banking system, raising questions about financial security in the digital age.</p><p>Finally, the approval of CRISPR pigs for food could mark a new era in consumer products. As gene editing becomes more prevalent, we must consider the ethical implications of such advancements. The future is now, and it's our responsibility to navigate it wisely.</p><blockquote>\"As AI becomes more powerful, it's also becoming more unpredictable.\"</blockquote><blockquote>\"The future is now, and it's our responsibility to navigate it wisely.\"</blockquote>",
+    "summary": "This article discusses recent developments in the field of futurology, including advancements in AI, space exploration, and gene editing. It highlights the potential benefits and challenges of these technologies, emphasizing the need for careful navigation of our increasingly automated and digitized world.",
+    "tags": [
+      "ai",
+      "futurology",
+      "gene editing",
+      "space exploration",
+      "cryptocurrency"
+    ],
+    "topic": "Futurology",
+    "category": "Op-Ed"
+  },
+  "config": {
+    "minQualityScore": 30,
+    "minWordCount": 225
+  }
+}

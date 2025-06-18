@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-06-18T14:46:02.808Z",
+  "reason": "Validation failed: Too few words",
+  "score": 0,
+  "original": {
+    "title": "Lawyer who defended drug lord 'El Chapo' elected as judge",
+    "description": "Silvia Delgado was one of the most controversial candidates to run in Mexico's judicial election.",
+    "content": "El Chapo: Lawyer Silvia Delgado who defended drug lord elected as judge {\"@context\":\"http://schema.org\",\"@type\":\"ReportageNewsArticle\",\"url\":\"https://www.bbc.com/news/articles/cjel33x4q3eo\",\"publisher\":{\"@type\":\"NewsMediaOrganization\",\"name\":\"BBC News\",\"publishingPrinciples\":\"http://www.bbc.co.uk/news/help-41670342\",\"logo\":{\"@type\":\"ImageObject\",\"url\":\"https://static.files.bbci.co.uk/ws/simorgh-assets/public/news/images/metadata/poster-1024x576.png\"}},\"datePublished\":\"2025-06-18T09:50:43.955Z\",\"dateModified\":\"2025-06-18T09:50:43.955Z\",\"description\":\"Silvia Delgado was one of the most controversial candidates to run in Mexico's judicial election.\",\"headline\":\"El Chapo: Lawyer Silvia Delgado who defended drug lord elected as judge\",\"image\":{\"@type\":\"ImageObject\",\"width\":1024,\"height\":576,\"url\":\"https://ichef.bbci.co.uk/news/1024/branded_news/78d3/live/e1df8af0-4c25-11f0-ac5b-1dcff18d9d54.jpg\"},\"thumbnailUrl\":\"https://ichef.bbci.co.uk/news/1024/branded_news/78d3/live/e1df8af0-4c25-11f0-ac5b-1dcff18d9d54.jpg\",\"mainEntityOfPage\":\"https://www.bbc.com/news/articles/cjel33x4q3eo\",\"author\":[{\"@type\":\"Person\",\"name\":\"Will Grant\"}]} window.serverEnv = \"live\"; window.dotcom = window.dotcom || { cmd: [] }; window.dotcom.ads = window.dotcom.ads || { resolves: {enabled: [], getAdTag: []}, enabled: () => new Promise(r => window.dotcom.ads.resolves.enabled.push(r)), getAdTag: () => new Promise(r => window.dotcom.ads.resolves.getAdTag.push(r)) }; setTimeout(() => { if(window.dotcom.ads.resolve",
+    "url": "https://www.bbc.com/news/articles/cjel33x4q3eo",
+    "pubDate": "Wed, 18 Jun 2025 09:50:43 GMT",
+    "source": {
+      "name": "BBC News"
+    }
+  },
+  "rewritten": {
+    "title": "From El Chapo's Defense to the Bench: A Controversial Ascension",
+    "rewritten": "Silvia Delgado, the lawyer who defended notorious drug lord 'El Chapo', has been elected as a judge, marking a controversial shift in Mexico's judicial landscape.<p>Delgado's election has sparked a heated debate about the integrity of the judicial system and the potential influence of drug cartels. Her previous role as El Chapo's defense attorney raises questions about her ability to remain impartial in cases involving drug-related crimes.<p>Delgado's ascension to the bench is emblematic of a larger issue plaguing Mexico's judicial system: the pervasive influence of drug cartels. It's no secret that these criminal organizations have infiltrated various levels of government and law enforcement. Now, it seems, they may have a foothold in the judiciary as well.<p>However, some argue that Delgado's experience in high-profile, complex cases could be an asset to the court. Her intimate knowledge of the strategies employed by drug cartels could potentially aid in their prosecution. Yet, this argument is overshadowed by concerns about her potential biases and conflicts of interest.<p>Ultimately, Delgado's election is a reflection of the complexities and contradictions of Mexico's judicial system. It remains to be seen whether her tenure will be marked by controversy or reform. But one thing is clear: her appointment has already stirred the pot, and the ripples are likely to be felt for years to come.",
+    "summary": "Silvia Delgado, who once defended drug lord 'El Chapo', has been elected as a judge in Mexico, sparking a controversy about the integrity of the judicial system and the potential influence of drug cartels.",
+    "tags": [
+      "mexico",
+      "judicial system",
+      "drug cartels",
+      "el chapo",
+      "silvia delgado"
+    ],
+    "topic": "Politics",
+    "category": "Opinion"
+  },
+  "config": {
+    "minQualityScore": 30,
+    "minWordCount": 350
+  }
+}

@@ -1,67 +1,644 @@
 {
-  "articlesFetched": 1,
-  "articlesProcessed": 1,
+  "articlesFetched": 20,
+  "articlesProcessed": 7,
   "articlesRejected": 0,
-  "totalCost": 0.00096,
+  "totalCost": 0.00042599999999999995,
+  "apiCalls": 23,
   "reporterStats": {
     "Cade Vox": {
-      "articlesWritten": 0,
-      "avgQualityScore": 0,
-      "avgWordCount": 0,
-      "topicsCovered": {},
-      "lastUsed": null
-    },
-    "Juno Blaze": {
-      "articlesWritten": 1,
-      "avgQualityScore": 64,
-      "avgWordCount": 256,
+      "articlesWritten": 3,
+      "avgQualityScore": 85,
+      "avgWordCount": 433,
       "topicsCovered": {
-        "AI ethics": 1
+        "Politics": 3
       },
-      "lastUsed": "2025-04-09T14:22:18.750Z"
+      "lastUsed": "2025-06-18T16:37:35.717Z",
+      "perTopicScore": {
+        "Politics": {
+          "totalScore": 255,
+          "articles": 3
+        }
+      },
+      "totalAttempts": 4,
+      "avgProcessingTime": 31311,
+      "successRate": 75
     },
-    "Dex Rawlins": {
+    "Nyx Ashwood": {
+      "articlesWritten": 2,
+      "avgQualityScore": 85,
+      "avgWordCount": 427,
+      "topicsCovered": {
+        "Technology": 1,
+        "Cybersecurity": 1
+      },
+      "lastUsed": "2025-06-18T16:38:20.432Z",
+      "perTopicScore": {
+        "Technology": {
+          "totalScore": 85,
+          "articles": 1
+        },
+        "Cybersecurity": {
+          "totalScore": 85,
+          "articles": 1
+        }
+      },
+      "totalAttempts": 2,
+      "successRate": 100
+    },
+    "Silas Kincaid": {
       "articlesWritten": 0,
       "avgQualityScore": 0,
       "avgWordCount": 0,
       "topicsCovered": {},
-      "lastUsed": null
+      "lastUsed": "2025-06-18T14:05:29.516Z",
+      "perTopicScore": {},
+      "totalAttempts": null,
+      "avgProcessingTime": null
     },
-    "Luna Trace": {
+    "Nova Wren": {
       "articlesWritten": 0,
       "avgQualityScore": 0,
       "avgWordCount": 0,
       "topicsCovered": {},
-      "lastUsed": null
+      "lastUsed": "2025-06-18T14:45:20.195Z",
+      "perTopicScore": {},
+      "totalAttempts": null,
+      "avgProcessingTime": null
     },
-    "Brick Malone": {
-      "articlesWritten": 0,
-      "avgQualityScore": 0,
-      "avgWordCount": 0,
-      "topicsCovered": {},
-      "lastUsed": null
+    "Rex Hardline": {
+      "articlesWritten": 4,
+      "avgQualityScore": 75,
+      "avgWordCount": 336,
+      "topicsCovered": {
+        "Technology": 1,
+        "Politics": 2,
+        "Health": 1
+      },
+      "lastUsed": "2025-06-18T16:35:15.783Z",
+      "perTopicScore": {
+        "Technology": {
+          "totalScore": 45,
+          "articles": 1
+        },
+        "Politics": {
+          "totalScore": 170,
+          "articles": 2
+        },
+        "Health": {
+          "totalScore": 85,
+          "articles": 1
+        }
+      },
+      "totalAttempts": 6,
+      "avgProcessingTime": 31168,
+      "successRate": 66.66666666666666,
+      "errors": [
+        {
+          "timestamp": "2025-06-18T16:04:26.804Z",
+          "error": "Failed to rewrite article",
+          "article": "could we be quietly returning to a world of makers, not just consumers?"
+        }
+      ]
     },
     "Echo Vox": {
-      "articlesWritten": 0,
-      "avgQualityScore": 0,
-      "avgWordCount": 0,
-      "topicsCovered": {},
-      "lastUsed": null
+      "articlesWritten": 1,
+      "avgQualityScore": 45,
+      "avgWordCount": 188,
+      "topicsCovered": {
+        "Travel and Tourism": 1
+      },
+      "lastUsed": "2025-06-17T21:34:51.716Z",
+      "perTopicScore": {
+        "Travel and Tourism": {
+          "totalScore": 45,
+          "articles": 1
+        }
+      },
+      "totalAttempts": null,
+      "avgProcessingTime": null
     },
-    "Max Power": {
-      "articlesWritten": 0,
-      "avgQualityScore": 0,
-      "avgWordCount": 0,
-      "topicsCovered": {},
-      "lastUsed": null
+    "Jet Calder": {
+      "articlesWritten": 1,
+      "avgQualityScore": 45,
+      "avgWordCount": 213,
+      "topicsCovered": {
+        "Politics": 1
+      },
+      "lastUsed": "2025-06-17T21:34:36.959Z",
+      "perTopicScore": {
+        "Politics": {
+          "totalScore": 45,
+          "articles": 1
+        }
+      },
+      "totalAttempts": null,
+      "avgProcessingTime": null
     },
-    "Sage Winters": {
+    "Dr. Halcyon Vale": {
+      "articlesWritten": 2,
+      "avgQualityScore": 85,
+      "avgWordCount": 373,
+      "topicsCovered": {
+        "AI Regulation": 1,
+        "Politics": 1
+      },
+      "lastUsed": "2025-06-18T16:02:26.577Z",
+      "perTopicScore": {
+        "AI Regulation": {
+          "totalScore": 85,
+          "articles": 1
+        },
+        "Politics": {
+          "totalScore": 85,
+          "articles": 1
+        }
+      },
+      "totalAttempts": 4,
+      "avgProcessingTime": 35279.666666666664,
+      "successRate": 50
+    },
+    "Wren Hollow": {
+      "articlesWritten": 1,
+      "avgQualityScore": 85,
+      "avgWordCount": 261,
+      "topicsCovered": {
+        "Op-Ed": 1
+      },
+      "lastUsed": "2025-06-18T14:27:21.944Z",
+      "perTopicScore": {
+        "Op-Ed": {
+          "totalScore": 85,
+          "articles": 1
+        }
+      },
+      "totalAttempts": 2,
+      "avgProcessingTime": 29984
+    },
+    "Marcus Kane": {
       "articlesWritten": 0,
       "avgQualityScore": 0,
       "avgWordCount": 0,
+      "avgProcessingTime": 0,
       "topicsCovered": {},
-      "lastUsed": null
+      "lastUsed": null,
+      "perTopicScore": {},
+      "successRate": 100,
+      "totalAttempts": 0,
+      "errors": []
+    },
+    "Dr. Sarah Chen": {
+      "articlesWritten": 2,
+      "avgQualityScore": 85,
+      "avgWordCount": 444.5,
+      "avgProcessingTime": 0,
+      "topicsCovered": {
+        "Health": 2
+      },
+      "lastUsed": "2025-06-18T16:34:18.429Z",
+      "perTopicScore": {
+        "Health": {
+          "totalScore": 170,
+          "articles": 2
+        }
+      },
+      "successRate": 100,
+      "totalAttempts": 2,
+      "errors": []
     }
   },
-  "lastUpdated": "2025-04-09T14:20:00.465Z"
+  "lastUpdated": "2025-06-18T16:30:32.345Z",
+  "errors": [],
+  "performance": {
+    "avgProcessingTime": 79410,
+    "totalRuns": 17
+  },
+  "lastSaved": "2025-06-18T16:38:20.688Z",
+  "config": {
+    "REDDIT_SUBREDDITS": [
+      "technology",
+      "Futurology",
+      "worldnews"
+    ],
+    "REDDIT_POST_LIMIT": 25,
+    "CACHE_EXPIRY_HOURS": 0,
+    "SMART_REFRESH_HOURS": 0,
+    "ARTICLES_PER_TOPIC": 4,
+    "TOPICS_PER_RUN": 2,
+    "MIN_QUALITY_SCORE": 65,
+    "MIN_WORD_COUNT": 400,
+    "BONUS_WORD_COUNT": 500,
+    "MIN_PARAGRAPHS": 4,
+    "OPENAI_MODEL": "gpt-4",
+    "OPENAI_TEMPERATURE": 0.3,
+    "MAX_RETRIES": 3,
+    "RETRY_DELAY_MS": 1000,
+    "RSS_FEEDS": [],
+    "CRON_SCHEDULES": [
+      "0 6",
+      "9",
+      "12",
+      "15",
+      "18",
+      "21",
+      "0",
+      "3 * * *"
+    ],
+    "DEFAULT_SUBREDDITS": [
+      "politics",
+      "worldnews",
+      "TrueReddit",
+      "NeutralPolitics",
+      "moderatepolitics",
+      "inthenews",
+      "qualitynews",
+      "technology",
+      "privacy",
+      "cybersecurity",
+      "Futurology",
+      "MachineLearning",
+      "singularity",
+      "Economics",
+      "LateStageCapitalism",
+      "investing",
+      "CryptoCurrency",
+      "wallstreetbets",
+      "antiwork",
+      "ABoringDystopia",
+      "collapse",
+      "environment",
+      "conspiracy",
+      "HighStrangeness",
+      "undelete",
+      "geopolitics",
+      "ukpolitics",
+      "europe",
+      "preppers",
+      "Survival",
+      "SelfSufficiency"
+    ],
+    "TOPIC_SUBREDDITS": {
+      "US politics": [
+        "politics",
+        "Conservative",
+        "progressive",
+        "Libertarian",
+        "moderatepolitics"
+      ],
+      "surveillance state": [
+        "privacy",
+        "cybersecurity",
+        "conspiracy",
+        "stallmanwasright"
+      ],
+      "AI ethics": [
+        "MachineLearning",
+        "artificial",
+        "singularity",
+        "technology"
+      ],
+      "climate policy": [
+        "environment",
+        "climatechange",
+        "Green",
+        "sustainability"
+      ],
+      "cryptocurrency": [
+        "CryptoCurrency",
+        "Bitcoin",
+        "crypto",
+        "wallstreetbets"
+      ],
+      "labor rights": [
+        "antiwork",
+        "LateStageCapitalism",
+        "socialism",
+        "WorkReform"
+      ],
+      "conspiracy theories": [
+        "conspiracy",
+        "HighStrangeness",
+        "C_S_T",
+        "conspiracy_commons"
+      ],
+      "collapse preparedness": [
+        "preppers",
+        "Survival",
+        "collapse",
+        "PostCollapse"
+      ],
+      "tech regulation": [
+        "technology",
+        "privacy",
+        "netsec",
+        "TechNewsToday"
+      ],
+      "global economy": [
+        "Economics",
+        "investing",
+        "economy",
+        "financialindependence"
+      ],
+      "foreign affairs": [
+        "geopolitics",
+        "worldnews",
+        "internationalpolitics",
+        "europe"
+      ],
+      "military industrial complex": [
+        "Military",
+        "EndlessWar",
+        "geopolitics",
+        "conspiracy"
+      ],
+      "free speech": [
+        "FreeSpeech",
+        "censorship",
+        "WatchRedditDie",
+        "undelete"
+      ],
+      "media bias": [
+        "media_criticism",
+        "journalism",
+        "TrueReddit",
+        "qualitynews"
+      ],
+      "civil unrest": [
+        "PublicFreakout",
+        "news",
+        "politics",
+        "Bad_Cop_No_Donut"
+      ],
+      "misinformation & propaganda": [
+        "PropagandaPosters",
+        "MediaSynthesis",
+        "conspiracy"
+      ],
+      "culture wars": [
+        "KotakuInAction",
+        "TumblrInAction",
+        "SocialJusticeInAction"
+      ],
+      "digital privacy": [
+        "privacy",
+        "privacytoolsIO",
+        "cybersecurity",
+        "netsec"
+      ],
+      "mental health crisis": [
+        "mentalhealth",
+        "depression",
+        "anxiety",
+        "psychology"
+      ],
+      "income inequality": [
+        "LateStageCapitalism",
+        "antiwork",
+        "povertyfinance",
+        "Economics"
+      ],
+      "corporate overreach": [
+        "LateStageCapitalism",
+        "ABoringDystopia",
+        "conspiracy"
+      ],
+      "automation & jobs": [
+        "Futurology",
+        "antiwork",
+        "technology",
+        "singularity"
+      ],
+      "biohacking & longevity": [
+        "longevity",
+        "biohackers",
+        "Nootropics",
+        "singularity"
+      ],
+      "space colonization": [
+        "SpaceX",
+        "space",
+        "Mars",
+        "Futurology"
+      ],
+      "deep learning": [
+        "MachineLearning",
+        "artificial",
+        "deeplearning",
+        "singularity"
+      ],
+      "quantum computing": [
+        "quantum",
+        "Physics",
+        "technology",
+        "Futurology"
+      ],
+      "water scarcity": [
+        "environment",
+        "collapse",
+        "ClimateChange",
+        "sustainability"
+      ],
+      "environmental collapse": [
+        "collapse",
+        "environment",
+        "ClimateChange",
+        "Green"
+      ],
+      "post-capitalist transition": [
+        "socialism",
+        "communism",
+        "LateStageCapitalism",
+        "antiwork"
+      ],
+      "election integrity": [
+        "politics",
+        "conspiracy",
+        "Conservative",
+        "progressive"
+      ],
+      "shadow governance": [
+        "conspiracy",
+        "DeepStateWatch",
+        "geopolitics",
+        "HighStrangeness"
+      ],
+      "prison industrial complex": [
+        "Bad_Cop_No_Donut",
+        "politics",
+        "socialism"
+      ],
+      "whistleblower suppression": [
+        "WikiLeaks",
+        "conspiracy",
+        "privacy",
+        "FreeSpeech"
+      ],
+      "disaster capitalism": [
+        "LateStageCapitalism",
+        "conspiracy",
+        "Economics",
+        "collapse"
+      ],
+      "medical freedom": [
+        "conspiracy",
+        "DebateVaccines",
+        "LockdownSkepticism"
+      ],
+      "pharmaceutical corruption": [
+        "conspiracy",
+        "BigPharma",
+        "DebateVaccines",
+        "medicine"
+      ],
+      "racial justice": [
+        "BlackPeopleTwitter",
+        "racism",
+        "politics",
+        "socialjustice"
+      ],
+      "gender politics": [
+        "TwoXChromosomes",
+        "MensRights",
+        "GenderCritical",
+        "politics"
+      ],
+      "reproductive rights": [
+        "TwoXChromosomes",
+        "prochoice",
+        "politics",
+        "abortion"
+      ],
+      "LGBTQ+ rights": [
+        "lgbt",
+        "ainbow",
+        "transgender",
+        "politics"
+      ],
+      "financial crimes": [
+        "investing",
+        "wallstreetbets",
+        "SecurityAnalysis",
+        "Economics"
+      ],
+      "market manipulation": [
+        "wallstreetbets",
+        "investing",
+        "superstonk",
+        "Economics"
+      ],
+      "central banking": [
+        "Economics",
+        "Bitcoin",
+        "investing",
+        "conspiracy"
+      ],
+      "algorithmic governance": [
+        "technology",
+        "privacy",
+        "Futurology",
+        "conspiracy"
+      ],
+      "smart cities": [
+        "technology",
+        "privacy",
+        "urbanism",
+        "conspiracy"
+      ],
+      "digital ID systems": [
+        "privacy",
+        "conspiracy",
+        "technology",
+        "cybersecurity"
+      ],
+      "predictive policing": [
+        "Bad_Cop_No_Donut",
+        "privacy",
+        "technology",
+        "conspiracy"
+      ],
+      "social credit systems": [
+        "privacy",
+        "conspiracy",
+        "technology",
+        "China"
+      ],
+      "machine learning bias": [
+        "MachineLearning",
+        "technology",
+        "privacy",
+        "artificial"
+      ],
+      "automation economics": [
+        "Economics",
+        "Futurology",
+        "antiwork",
+        "technology"
+      ],
+      "grid failure": [
+        "preppers",
+        "collapse",
+        "energy",
+        "conspiracy"
+      ],
+      "supply chain collapse": [
+        "preppers",
+        "collapse",
+        "economy",
+        "conspiracy"
+      ],
+      "food security": [
+        "preppers",
+        "collapse",
+        "gardening",
+        "homesteading"
+      ],
+      "water security": [
+        "preppers",
+        "collapse",
+        "environment",
+        "conspiracy"
+      ],
+      "energy security": [
+        "energy",
+        "preppers",
+        "collapse",
+        "geopolitics"
+      ],
+      "cyber attacks": [
+        "cybersecurity",
+        "netsec",
+        "technology",
+        "conspiracy"
+      ],
+      "natural disasters": [
+        "preppers",
+        "collapse",
+        "climate",
+        "environment"
+      ],
+      "community resilience": [
+        "preppers",
+        "collapse",
+        "homesteading",
+        "SelfSufficiency"
+      ],
+      "self-sufficiency": [
+        "preppers",
+        "homesteading",
+        "SelfSufficiency",
+        "collapse"
+      ],
+      "survivalism": [
+        "preppers",
+        "Survival",
+        "collapse",
+        "SelfSufficiency"
+      ],
+      "prepper movement": [
+        "preppers",
+        "Survival",
+        "collapse",
+        "SelfSufficiency"
+      ]
+    }
+  }
 }
