@@ -1,5 +1,5 @@
 // client/src/components/MainFeed.js
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import styled from "styled-components";
 
 import ArticleCard from "./ArticleCard";
@@ -25,7 +25,7 @@ const GreetingText = styled.h2`
   color: #f5d442;
   margin: 0;
   line-height: 1.1;
-  transform: rotate(-2deg);
+  transform: rotate(-4deg);
   text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.6);
 
   /* Responsive font sizes */
@@ -183,12 +183,12 @@ const MainFeed = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  const getTimeOfDay = () => {
+  const getTimeOfDay = useMemo(() => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning.";
     if (hour < 18) return "Good Afternoon.";
     return "Good Evening.";
-  };
+  }, []);
 
   const filteredArticles =
     activeCategory === "all"
