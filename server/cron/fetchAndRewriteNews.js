@@ -29,9 +29,7 @@ const CONFIG = {
   MAX_RETRIES: parseInt(process.env.MAX_RETRIES) || 3,
   RETRY_DELAY_MS: parseInt(process.env.RETRY_DELAY_MS) || 1000,
   RSS_FEEDS: (process.env.RSS_FEEDS || "").split(",").filter(Boolean),
-  CRON_SCHEDULES: (
-    process.env.CRON_SCHEDULES || "0 6,9,12,15,18,21,0,3 * * *"
-  ).split(","),
+  CRON_SCHEDULES: [process.env.CRON_SCHEDULES || "0 6,9,12,15,18,21,0,3 * * *"],
 
   // Enhanced subreddit configuration
   DEFAULT_SUBREDDITS: [
