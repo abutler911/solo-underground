@@ -1,5 +1,6 @@
 // client/src/components/MainFeed.js
 import { useState, useEffect, useMemo } from "react";
+import { useCallback } from "react";
 import styled from "styled-components";
 
 import ArticleCard from "./ArticleCard";
@@ -183,7 +184,7 @@ const MainFeed = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  const getTimeOfDay = useMemo(() => {
+  const getTimeOfDay = useCallback(() => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning.";
     if (hour < 18) return "Good Afternoon.";
