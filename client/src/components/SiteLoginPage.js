@@ -5,7 +5,7 @@ import styled, { keyframes } from "styled-components";
 import { useAuth } from "../context/AuthContext";
 import TerminalBootText from "./TerminalBootText";
 
-// Add more apocalyptic keyframes
+// Consolidated keyframes - no duplicates
 const glitch = keyframes`
   0% { transform: translate(0); }
   20% { transform: translate(-2px, 2px); }
@@ -163,7 +163,6 @@ const LoginContainer = styled.div`
     z-index: 2;
   }
 
-  /* Improve mobile experience */
   @media (max-width: 768px) {
     padding: 1rem;
     justify-content: flex-start;
@@ -175,63 +174,11 @@ const LoginContainer = styled.div`
     padding-top: 8vh;
   }
 
-  /* Handle landscape orientation on mobile */
   @media (max-height: 600px) and (orientation: landscape) {
     padding: 1rem;
     justify-content: center;
     min-height: 100vh;
   }
-`;
-
-const flash = keyframes`
-  0% { opacity: 0; transform: scale(0.95); }
-  50% { opacity: 1; transform: scale(1.05); }
-  100% { opacity: 1; transform: scale(1); }
-`;
-
-const typewriter = keyframes`
-  from { width: 0; }
-  to { width: 100%; }
-`;
-
-const intenseFadeOut = keyframes`
-  0% { 
-    opacity: 1; 
-    transform: scale(1);
-    filter: brightness(1);
-  }
-  20% { 
-    opacity: 1; 
-    transform: scale(1.02);
-    filter: brightness(1.2);
-  }
-  40% { 
-    opacity: 1; 
-    transform: scale(1);
-    filter: brightness(1.5);
-  }
-  70% { 
-    opacity: 0.8; 
-    transform: scale(0.98);
-    filter: brightness(1.8) blur(1px);
-  }
-  85% { 
-    opacity: 0.4; 
-    transform: scale(0.95);
-    filter: brightness(2) blur(2px);
-  }
-  100% { 
-    opacity: 0; 
-    transform: scale(0.9);
-    filter: brightness(3) blur(5px);
-  }
-`;
-
-const matrixRain = keyframes`
-  0% { transform: translateY(-100vh); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { transform: translateY(100vh); opacity: 0; }
 `;
 
 const Overlay = styled.div`
@@ -339,7 +286,6 @@ const Logo = styled.h1`
   position: relative;
   animation: ${flicker} 4s infinite;
 
-  /* Add glitch overlay effect */
   &::before {
     content: "SOLO UNDERGROUND";
     position: absolute;
@@ -396,7 +342,6 @@ const Subtitle = styled.p`
   text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
   animation: ${flicker} 6s infinite;
 
-  /* Add typing effect */
   &::before {
     content: "> ";
     color: #00ff41;
@@ -422,7 +367,6 @@ const LogoContainer = styled.div`
     margin-bottom: 1.5rem;
   }
 
-  /* Landscape mobile */
   @media (max-height: 600px) and (orientation: landscape) {
     margin-bottom: 1rem;
   }
@@ -451,7 +395,6 @@ const FormContainer = styled.div`
     inset 0 0 20px rgba(0, 255, 65, 0.05), 0 10px 25px rgba(0, 0, 0, 0.3);
   position: relative;
 
-  /* Add terminal-like scanlines */
   &::before {
     content: "";
     position: absolute;
@@ -467,7 +410,6 @@ const FormContainer = styled.div`
     pointer-events: none;
   }
 
-  /* Add corner brackets */
   &::after {
     content: "";
     position: absolute;
@@ -495,7 +437,6 @@ const FormContainer = styled.div`
     margin: 0 auto;
   }
 
-  /* Landscape mobile */
   @media (max-height: 600px) and (orientation: landscape) {
     padding: 1rem;
   }
@@ -550,11 +491,10 @@ const Input = styled.input`
   box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.1),
     0 0 5px rgba(0, 255, 65, 0.2);
 
-  /* Improve mobile input experience */
   @media (max-width: 768px) {
     padding: 1rem;
     border-radius: 6px;
-    font-size: 16px; /* Prevent zoom on iOS */
+    font-size: 16px;
   }
 
   &:focus {
@@ -576,23 +516,9 @@ const Input = styled.input`
     font-family: "Courier New", monospace;
   }
 
-  /* Handle password managers */
   &:-webkit-autofill {
     -webkit-box-shadow: 0 0 0 1000px rgba(0, 40, 0, 0.8) inset;
     -webkit-text-fill-color: #00ff41;
-  }
-
-  /* Add blinking cursor effect */
-  &:focus::after {
-    content: "";
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 2px;
-    height: 20px;
-    background: #00ff41;
-    animation: ${flicker} 1s infinite;
   }
 `;
 
@@ -631,7 +557,6 @@ const FingerprintButton = styled.button`
   min-width: 44px;
   text-shadow: 0 0 10px rgba(0, 255, 65, 0.8);
 
-  /* Add pulsing effect */
   &::before {
     content: "";
     position: absolute;
@@ -641,7 +566,6 @@ const FingerprintButton = styled.button`
     animation: ${flicker} 2s infinite;
   }
 
-  /* Add rotating scanner effect */
   &::after {
     content: "";
     position: absolute;
@@ -758,7 +682,6 @@ const SubmitButton = styled.button`
   position: relative;
   overflow: hidden;
 
-  /* Add scanning line effect */
   &::before {
     content: "";
     position: absolute;
@@ -856,13 +779,11 @@ const Footer = styled.div`
     margin-top: 1.5rem;
   }
 
-  /* Landscape mobile */
   @media (max-height: 600px) and (orientation: landscape) {
     margin-top: 1rem;
   }
 `;
 
-// Accessibility improvements
 const VisuallyHidden = styled.span`
   position: absolute;
   width: 1px;
@@ -879,7 +800,7 @@ const SiteLoginPage = memo(() => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [authStatus, setAuthStatus] = useState(null); // 'granted' or 'denied'
+  const [authStatus, setAuthStatus] = useState(null);
   const [showIntenseOverlay, setShowIntenseOverlay] = useState(false);
   const { siteLogin, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -893,7 +814,7 @@ const SiteLoginPage = memo(() => {
   const handlePasswordChange = useCallback(
     (e) => {
       setPassword(e.target.value);
-      if (error) setError(""); // Clear error when user starts typing
+      if (error) setError("");
     },
     [error]
   );
@@ -916,22 +837,16 @@ const SiteLoginPage = memo(() => {
         setAuthStatus(success ? "granted" : "denied");
 
         if (success) {
-          // For successful login: show intense sequence
           setShowIntenseOverlay(true);
 
-          // Phase 1: Show the message for 3 seconds with typewriter effect
-          // Phase 2: Fade out intensely for 2 seconds
-          // Phase 3: Navigate after total 5 seconds
           setTimeout(() => {
             navigate("/");
           }, 5000);
 
-          // Reset loading after the typewriter completes but keep overlay
           setTimeout(() => {
             setIsLoading(false);
           }, 3000);
         } else {
-          // For failed login: quick feedback
           setTimeout(() => {
             setAuthStatus(null);
             setError("Access Denied. Invalid passphrase.");
@@ -950,7 +865,6 @@ const SiteLoginPage = memo(() => {
     [password, siteLogin, navigate]
   );
 
-  // Handle enter key press
   const handleKeyPress = useCallback(
     (e) => {
       if (e.key === "Enter" && !isLoading) {
@@ -1014,7 +928,6 @@ const SiteLoginPage = memo(() => {
               )}
             </SubmitButton>
 
-            {/* Alternative fingerprint button for visual appeal */}
             <FingerprintButton
               type="button"
               disabled={isLoading || !password.trim()}
