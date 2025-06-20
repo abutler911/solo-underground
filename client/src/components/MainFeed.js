@@ -1,12 +1,31 @@
 // client/src/components/MainFeed.js
-import { useState, useEffect, useMemo } from "react";
-import { useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import styled from "styled-components";
 
 import ArticleCard from "./ArticleCard";
 import api from "../utils/api";
 
-// Removed Header and Navigation components as they're now in the Layout
+// Constants moved outside component to prevent recreation
+const CATEGORIES = [
+  { id: "all", name: "All" },
+  { id: "politics", name: "Politics" },
+  { id: "finance", name: "Finance" },
+  { id: "editorial", name: "Editorial" },
+  { id: "technology", name: "Technology" },
+  { id: "lifestyle", name: "Lifestyle" },
+];
+
+const MAX_WIDTH = "850px";
+
+// Utility function moved outside component
+const getTimeOfDay = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good Morning.";
+  if (hour < 18) return "Good Afternoon.";
+  return "Good Evening.";
+};
+
+// Styled components remain the same but with constants
 const FeedContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -29,13 +48,12 @@ const GreetingText = styled.h2`
   transform: rotate(-4deg);
   text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.6);
 
-  /* Responsive font sizes */
   @media (max-width: 768px) {
-    font-size: 3.5rem; /* Increased from 2.5rem */
+    font-size: 3.5rem;
   }
 
   @media (max-width: 480px) {
-    font-size: 2.8rem; /* Added a smaller breakpoint */
+    font-size: 2.8rem;
   }
 `;
 
@@ -80,7 +98,7 @@ const FeaturedIcon = styled.span`
 const ArticlesContainer = styled.div`
   display: flex;
   flex-direction: column;
-  max-width: 850px;
+  max-width: ${MAX_WIDTH};
   margin: 0 auto;
   width: 100%;
   padding: 0 1.5rem;
@@ -121,12 +139,11 @@ const CategoryNav = styled.div`
   gap: 1rem;
   padding: 0.5rem 1.5rem 2rem;
   margin: 0 auto;
-  max-width: 850px;
+  max-width: ${MAX_WIDTH};
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 
-  /* Hide scrollbar */
   scrollbar-width: none;
   -ms-overflow-style: none;
   &::-webkit-scrollbar {
@@ -153,92 +170,135 @@ const CategoryButton = styled.button`
   }
 `;
 
+// Memoized components for better performance
+const CategoryNavigation = memo(({ activeCategory, onCategoryChange }) => (
+  <CategoryNav>
+    {CATEGORIES.map((category) => (
+      <CategoryButton
+        key={category.id}
+        $active={activeCategory === category.id}
+        onClick={() => onCategoryChange(category.id)}
+      >
+        {category.name}
+      </CategoryButton>
+    ))}
+  </CategoryNav>
+));
+
+const ArticlesList = memo(({ articles, loading }) => {
+  if (loading) {
+    return (
+      <LoadingContainer>
+        <LoadingIndicator />
+      </LoadingContainer>
+    );
+  }
+
+  if (articles.length === 0) {
+    return (
+      <EmptyState>
+        No articles found. Check back soon for new content.
+      </EmptyState>
+    );
+  }
+
+  return articles.map((article) => (
+    <ArticleCard key={article._id} article={article} />
+  ));
+});
+
+const Greeting = memo(() => {
+  // Memoize the greeting text since it only changes based on time of day
+  const greeting = useMemo(() => getTimeOfDay(), []);
+
+  return (
+    <GreetingContainer>
+      <GreetingBackground />
+      <GreetingText>{greeting}</GreetingText>
+      <GreetingLine />
+    </GreetingContainer>
+  );
+});
+
 const MainFeed = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState("all");
 
-  const categories = [
-    { id: "all", name: "All" },
-    { id: "politics", name: "Politics" },
-    { id: "finance", name: "Finance" },
-    { id: "editorial", name: "Editorial" },
-    { id: "technology", name: "Technology" },
-    { id: "lifestyle", name: "Lifestyle" },
-  ];
+  // Memoized API call to prevent unnecessary re-creation
+  const fetchArticles = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await api.get("/api/articles");
+      setArticles(res.data);
+    } catch (err) {
+      console.error("Error fetching articles", err);
+      setError("Failed to load articles. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        const res = await api.get("/api/articles");
-        setArticles(res.data);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching articles", err);
-        setLoading(false);
-      }
-    };
     fetchArticles();
-
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
+  }, [fetchArticles]);
+
+  // Memoized filtered articles with dependency array
+  const filteredArticles = useMemo(() => {
+    if (activeCategory === "all") return articles;
+    return articles.filter(
+      (article) => article.category?.toLowerCase() === activeCategory
+    );
+  }, [articles, activeCategory]);
+
+  // Memoized section title
+  const sectionTitle = useMemo(() => {
+    if (activeCategory === "all") {
+      return "Featured Stories";
+    }
+    const category = CATEGORIES.find((c) => c.id === activeCategory);
+    return `${category?.name || "Unknown"} Stories`;
+  }, [activeCategory]);
+
+  // Memoized category change handler
+  const handleCategoryChange = useCallback((categoryId) => {
+    setActiveCategory(categoryId);
   }, []);
 
-  const getTimeOfDay = useCallback(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning.";
-    if (hour < 18) return "Good Afternoon.";
-    return "Good Evening.";
-  }, []);
-
-  const filteredArticles =
-    activeCategory === "all"
-      ? articles
-      : articles.filter(
-          (article) => article.category?.toLowerCase() === activeCategory
-        );
+  // Error state
+  if (error) {
+    return (
+      <FeedContainer>
+        <div style={{ padding: "2rem", textAlign: "center", color: "red" }}>
+          {error}
+          <button onClick={fetchArticles} style={{ marginLeft: "1rem" }}>
+            Retry
+          </button>
+        </div>
+      </FeedContainer>
+    );
+  }
 
   return (
     <FeedContainer>
-      <GreetingContainer>
-        <GreetingBackground />
-        <GreetingText>{getTimeOfDay()}</GreetingText>
-        <GreetingLine />
-      </GreetingContainer>
+      <Greeting />
 
-      <CategoryNav>
-        {categories.map((category) => (
-          <CategoryButton
-            key={category.id}
-            $active={activeCategory === category.id}
-            onClick={() => setActiveCategory(category.id)}
-          >
-            {category.name}
-          </CategoryButton>
-        ))}
-      </CategoryNav>
+      <CategoryNavigation
+        activeCategory={activeCategory}
+        onCategoryChange={handleCategoryChange}
+      />
 
       <SectionTitle>
         <FeaturedIcon>✦</FeaturedIcon>
-        {activeCategory === "all"
-          ? "Featured Stories"
-          : `${categories.find((c) => c.id === activeCategory)?.name} Stories`}
+        {sectionTitle}
       </SectionTitle>
 
       <ArticlesContainer>
-        {loading ? (
-          <LoadingContainer>
-            <LoadingIndicator />
-          </LoadingContainer>
-        ) : filteredArticles.length > 0 ? (
-          filteredArticles.map((article) => (
-            <ArticleCard key={article._id} article={article} />
-          ))
-        ) : (
-          <EmptyState>
-            No articles found. Check back soon for new content.
-          </EmptyState>
-        )}
+        <ArticlesList articles={filteredArticles} loading={loading} />
       </ArticlesContainer>
     </FeedContainer>
   );
