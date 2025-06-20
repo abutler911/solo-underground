@@ -128,6 +128,57 @@ const LoginContainer = styled.div`
   }
 `;
 
+const flash = keyframes`
+  0% { opacity: 0; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+`;
+
+const typewriter = keyframes`
+  from { width: 0; }
+  to { width: 100%; }
+`;
+
+const intenseFadeOut = keyframes`
+  0% { 
+    opacity: 1; 
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  20% { 
+    opacity: 1; 
+    transform: scale(1.02);
+    filter: brightness(1.2);
+  }
+  40% { 
+    opacity: 1; 
+    transform: scale(1);
+    filter: brightness(1.5);
+  }
+  70% { 
+    opacity: 0.8; 
+    transform: scale(0.98);
+    filter: brightness(1.8) blur(1px);
+  }
+  85% { 
+    opacity: 0.4; 
+    transform: scale(0.95);
+    filter: brightness(2) blur(2px);
+  }
+  100% { 
+    opacity: 0; 
+    transform: scale(0.9);
+    filter: brightness(3) blur(5px);
+  }
+`;
+
+const matrixRain = keyframes`
+  0% { transform: translateY(-100vh); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+`;
+
 const Overlay = styled.div`
   position: fixed;
   inset: 0;
@@ -149,27 +200,25 @@ const Overlay = styled.div`
   z-index: 999;
   backdrop-filter: blur(5px);
 
-  /* Add matrix-like effect */
+  /* Enhanced matrix-like effect with animation timing */
   &::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text y="50" font-family="monospace" font-size="12" fill="%2300ff4120">SOLO</text></svg>')
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text y="20" font-family="monospace" font-size="8" fill="%2300ff4120">SOLO</text><text y="40" font-family="monospace" font-size="8" fill="%2300ff4115">UNDER</text><text y="60" font-family="monospace" font-size="8" fill="%2300ff4110">GROUND</text><text y="80" font-family="monospace" font-size="8" fill="%2300ff4108">ACCESS</text></svg>')
       repeat;
-    animation: ${staticNoise} 2s linear infinite;
-    opacity: 0.3;
+    animation: ${matrixRain} 4s linear infinite,
+      ${staticNoise} 2s linear infinite;
+    opacity: 0.4;
   }
-`;
 
-const flash = keyframes`
-  0% { opacity: 0; transform: scale(0.95); }
-  50% { opacity: 1; transform: scale(1.05); }
-  100% { opacity: 1; transform: scale(1); }
-`;
-
-const typewriter = keyframes`
-  from { width: 0; }
-  to { width: 100%; }
+  /* Add additional fade out animation when granted */
+  ${(props) =>
+    props.$fadeOut &&
+    `
+    animation: ${intenseFadeOut} 2s ease-out forwards;
+    animation-delay: 3s;
+  `}
 `;
 
 const OverlayText = styled.h2`
@@ -194,14 +243,18 @@ const OverlayText = styled.h2`
     animation: ${flash} 0.5s ease-in-out, ${glitch} 0.3s ease-in-out infinite;
   `}
 
-  /* Add typewriter effect for granted status */
+  /* Enhanced typewriter effect for granted status with multiple phases */
   ${(props) =>
     props.status === "granted" &&
     `
     overflow: hidden;
     border-right: 2px solid #00ff41;
     white-space: nowrap;
-    animation: ${typewriter} 1.5s steps(40, end), ${flicker} 2s infinite;
+    animation: 
+      ${typewriter} 3s steps(60, end),
+      ${flicker} 2s infinite 3s,
+      ${intenseFadeOut} 2s ease-out 3s forwards;
+    max-width: 100%;
   `}
 
   @media (max-width: 480px) {
@@ -780,6 +833,7 @@ const SiteLoginPage = memo(() => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [authStatus, setAuthStatus] = useState(null); // 'granted' or 'denied'
+  const [showIntenseOverlay, setShowIntenseOverlay] = useState(false);
   const { siteLogin, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -814,22 +868,36 @@ const SiteLoginPage = memo(() => {
 
         setAuthStatus(success ? "granted" : "denied");
 
-        setTimeout(() => {
-          if (success) {
+        if (success) {
+          // For successful login: show intense sequence
+          setShowIntenseOverlay(true);
+
+          // Phase 1: Show the message for 3 seconds with typewriter effect
+          // Phase 2: Fade out intensely for 2 seconds
+          // Phase 3: Navigate after total 5 seconds
+          setTimeout(() => {
             navigate("/");
-          } else {
+          }, 5000);
+
+          // Reset loading after the typewriter completes but keep overlay
+          setTimeout(() => {
+            setIsLoading(false);
+          }, 3000);
+        } else {
+          // For failed login: quick feedback
+          setTimeout(() => {
             setAuthStatus(null);
             setError("Access Denied. Invalid passphrase.");
-          }
-          setIsLoading(false);
-        }, 1000);
+            setIsLoading(false);
+          }, 1500);
+        }
       } catch (err) {
         setAuthStatus("denied");
         setTimeout(() => {
           setAuthStatus(null);
           setError("An unexpected error occurred. Please try again.");
           setIsLoading(false);
-        }, 1000);
+        }, 1500);
       }
     },
     [password, siteLogin, navigate]
@@ -847,8 +915,8 @@ const SiteLoginPage = memo(() => {
 
   return (
     <LoginContainer>
-      {authStatus && (
-        <Overlay>
+      {(authStatus || showIntenseOverlay) && (
+        <Overlay $fadeOut={authStatus === "granted" && showIntenseOverlay}>
           <OverlayText status={authStatus}>
             {authStatus === "granted"
               ? "ACCESS GRANTED\n> INITIALIZING NEURAL LINK...\n> LOADING: [CLASSIFIED].log\n> WELCOME TO THE UNDERGROUND"
