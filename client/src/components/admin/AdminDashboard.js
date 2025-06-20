@@ -10,6 +10,14 @@ const DashboardContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 3rem 1.5rem;
+
+  @media (max-width: 768px) {
+    padding: 2rem 1rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem 0.75rem;
+  }
 `;
 
 // Header components
@@ -34,6 +42,32 @@ const AdminHeader = styled.header`
     z-index: -1;
     box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
   }
+
+  @media (max-width: 768px) {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+
+    &:before {
+      top: -2rem;
+      left: -1rem;
+      right: -1rem;
+      height: 200px;
+      border-radius: 0 0 20px 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+
+    &:before {
+      top: -1rem;
+      left: -0.75rem;
+      right: -0.75rem;
+      height: 160px;
+      border-radius: 0 0 15px 15px;
+    }
+  }
 `;
 
 const HeaderInner = styled.div`
@@ -46,6 +80,10 @@ const HeaderInner = styled.div`
     justify-content: space-between;
     align-items: flex-start;
   }
+
+  @media (max-width: 480px) {
+    gap: 1.5rem;
+  }
 `;
 
 const HeaderContent = styled.div`
@@ -57,13 +95,18 @@ const AdminBreadcrumb = styled.div`
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 1rem;
-  font-size: 0.85rem;
+  font-size: clamp(0.75rem, 2vw, 0.85rem);
   color: rgba(255, 255, 255, 0.6);
 
   svg {
-    width: 12px;
-    height: 12px;
+    width: clamp(10px, 2vw, 12px);
+    height: clamp(10px, 2vw, 12px);
     opacity: 0.6;
+  }
+
+  @media (max-width: 480px) {
+    margin-bottom: 0.75rem;
+    gap: 0.5rem;
   }
 `;
 
@@ -78,7 +121,7 @@ const BreadcrumbLink = styled(Link)`
 `;
 
 const AdminTitle = styled.h1`
-  font-size: 2.5rem;
+  font-size: clamp(1.8rem, 6vw, 2.5rem);
   font-weight: 700;
   margin: 0 0 0.75rem;
   background: linear-gradient(
@@ -90,14 +133,23 @@ const AdminTitle = styled.h1`
   -webkit-text-fill-color: transparent;
   font-family: "Playfair Display", serif;
   line-height: 1.2;
+  word-break: break-word;
+
+  @media (max-width: 480px) {
+    margin: 0 0 0.5rem;
+  }
 `;
 
 const AdminSubtitle = styled.p`
   color: rgba(255, 255, 255, 0.6);
-  font-size: 1rem;
+  font-size: clamp(0.85rem, 2.5vw, 1rem);
   max-width: 600px;
   line-height: 1.6;
   margin: 0;
+
+  @media (max-width: 480px) {
+    line-height: 1.5;
+  }
 `;
 
 const AdminStats = styled.div`
@@ -106,8 +158,16 @@ const AdminStats = styled.div`
   gap: 1.5rem;
   margin-top: 2rem;
 
-  @media (min-width: 768px) {
-    margin-top: 0;
+  @media (max-width: 768px) {
+    margin-top: 1.5rem;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  @media (max-width: 480px) {
+    margin-top: 1rem;
+    gap: 0.75rem;
+    grid-template-columns: repeat(3, 1fr);
   }
 `;
 
@@ -126,20 +186,38 @@ const StatCard = styled.div`
     background: rgba(255, 255, 255, 0.08);
     box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.2);
   }
+
+  @media (max-width: 768px) {
+    padding: 1.25rem;
+    border-radius: 10px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 8px;
+
+    &:hover {
+      transform: none; /* Disable hover transform on mobile for better touch experience */
+    }
+  }
 `;
 
 const StatValue = styled.span`
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
   font-weight: 700;
   color: white;
   margin-bottom: 0.25rem;
 `;
 
 const StatLabel = styled.span`
-  font-size: 0.85rem;
+  font-size: clamp(0.7rem, 2vw, 0.85rem);
   color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+
+  @media (max-width: 480px) {
+    letter-spacing: 0.3px;
+  }
 `;
 
 const AdminControls = styled.div`
@@ -152,6 +230,17 @@ const AdminControls = styled.div`
   @media (min-width: 768px) {
     margin-top: 0;
     justify-content: flex-end;
+  }
+
+  @media (max-width: 768px) {
+    margin-top: 1.5rem;
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 480px) {
+    margin-top: 1rem;
+    gap: 0.5rem;
+    width: 100%;
   }
 `;
 
@@ -172,10 +261,13 @@ const ActionButton = styled(Link)`
   transition: all 0.2s ease;
   box-shadow: ${(props) =>
     props.$primary ? "0 4px 12px rgba(70, 130, 180, 0.3)" : "none"};
+  font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+  min-height: 44px; /* Touch target size */
+  justify-content: center;
 
   svg {
-    width: 18px;
-    height: 18px;
+    width: clamp(16px, 3vw, 18px);
+    height: clamp(16px, 3vw, 18px);
   }
 
   &:hover {
@@ -185,6 +277,22 @@ const ActionButton = styled(Link)`
         : "rgba(255, 255, 255, 0.2)"};
     transform: translateY(-2px);
   }
+
+  @media (max-width: 768px) {
+    padding: 0.75rem 1.25rem;
+    gap: 0.5rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.8rem 1rem;
+    border-radius: 6px;
+    flex: 1;
+    min-width: 120px;
+
+    &:hover {
+      transform: none; /* Disable hover transform on mobile */
+    }
+  }
 `;
 
 const LogoutButton = styled.button`
@@ -192,17 +300,19 @@ const LogoutButton = styled.button`
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 2.2vw, 0.9rem);
   transition: all 0.2s ease;
   padding: 0.7rem 1.25rem;
   border-radius: 8px;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-height: 44px;
+  justify-content: center;
 
   svg {
-    width: 16px;
-    height: 16px;
+    width: clamp(14px, 2.5vw, 16px);
+    height: clamp(14px, 2.5vw, 16px);
     opacity: 0.7;
   }
 
@@ -214,6 +324,18 @@ const LogoutButton = styled.button`
       opacity: 1;
     }
   }
+
+  @media (max-width: 768px) {
+    padding: 0.75rem 1rem;
+    gap: 0.4rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.8rem 0.9rem;
+    border-radius: 6px;
+    flex: 1;
+    min-width: 100px;
+  }
 `;
 
 const AdminTabs = styled.div`
@@ -222,9 +344,11 @@ const AdminTabs = styled.div`
   margin-top: 2rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
-  @media (max-width: 600px) {
+  @media (max-width: 768px) {
+    margin-top: 1.5rem;
     overflow-x: auto;
     padding-bottom: 1px;
+    gap: 0.25rem;
 
     /* Hide scrollbar */
     -ms-overflow-style: none;
@@ -232,6 +356,10 @@ const AdminTabs = styled.div`
     &::-webkit-scrollbar {
       display: none;
     }
+  }
+
+  @media (max-width: 480px) {
+    margin-top: 1rem;
   }
 `;
 
@@ -243,26 +371,42 @@ const TabItem = styled.button`
   border: none;
   border-bottom: 2px solid
     ${(props) => (props.$active ? "white" : "transparent")};
-  font-size: 0.95rem;
+  font-size: clamp(0.8rem, 2.2vw, 0.95rem);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 
   &:hover {
     color: white;
     background: ${(props) =>
       props.$active ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)"};
   }
+
+  @media (max-width: 768px) {
+    padding: 0.7rem 1.25rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.8rem 1rem;
+    font-size: 0.85rem;
+  }
 `;
 
-// Table components
-const ArticlesTable = styled.div`
+// Mobile-first table design
+const ArticlesTableContainer = styled.div`
   width: 100%;
   background-color: rgba(255, 255, 255, 0.03);
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
+
+  @media (max-width: 768px) {
+    border-radius: 6px;
+  }
 `;
 
 const TableHeader = styled.div`
@@ -274,14 +418,77 @@ const TableHeader = styled.div`
   letter-spacing: 0.5px;
   color: rgba(255, 255, 255, 0.8);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: clamp(0.8rem, 2.2vw, 0.9rem);
 
   @media (max-width: 768px) {
     grid-template-columns: 2fr 1fr 1fr;
+    padding: 1rem 1.25rem;
 
     div:last-child {
       display: none;
     }
   }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr auto;
+    padding: 0.75rem 1rem;
+
+    div:nth-child(2),
+    div:nth-child(3) {
+      display: none;
+    }
+  }
+`;
+
+// Mobile-optimized card layout for small screens
+const MobileArticleCard = styled.div`
+  display: none;
+
+  @media (max-width: 480px) {
+    display: block;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+  }
+`;
+
+const MobileCardHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  gap: 1rem;
+`;
+
+const MobileCardTitle = styled.h3`
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+`;
+
+const MobileCardMeta = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+`;
+
+const MobileCardActions = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
 `;
 
 const TableRow = styled.div`
@@ -302,10 +509,15 @@ const TableRow = styled.div`
 
   @media (max-width: 768px) {
     grid-template-columns: 2fr 1fr 1fr;
+    padding: 1rem 1.25rem;
 
     div:last-child {
       display: none;
     }
+  }
+
+  @media (max-width: 480px) {
+    display: none; /* Hide on mobile, use card layout instead */
   }
 `;
 
@@ -315,17 +527,28 @@ const ArticleTitle = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   padding-right: 1rem;
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
+
+  @media (max-width: 768px) {
+    padding-right: 0.75rem;
+  }
 `;
 
 const Status = styled.span`
   display: inline-block;
   padding: 0.3rem 0.75rem;
   border-radius: 2rem;
-  font-size: 0.75rem;
+  font-size: clamp(0.7rem, 1.8vw, 0.75rem);
   font-weight: 600;
   background-color: ${(props) =>
     props.$published ? "rgba(46, 125, 50, 0.15)" : "rgba(249, 168, 37, 0.15)"};
   color: ${(props) => (props.$published ? "#4caf50" : "#ffc107")};
+  white-space: nowrap;
+
+  @media (max-width: 480px) {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.7rem;
+  }
 `;
 
 const TableActionButton = styled.button`
@@ -336,8 +559,10 @@ const TableActionButton = styled.button`
   border-radius: 4px;
   cursor: pointer;
   margin-right: 0.5rem;
-  font-size: 0.85rem;
+  font-size: clamp(0.75rem, 2vw, 0.85rem);
   transition: all 0.2s ease;
+  min-height: 36px;
+  min-width: 44px;
 
   &:hover {
     background-color: rgba(255, 255, 255, 0.2);
@@ -358,6 +583,18 @@ const TableActionButton = styled.button`
       background-color: rgba(198, 40, 40, 0.3);
     }
   }
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 0.6rem;
+    margin-right: 0.4rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.6rem 0.8rem;
+    margin-right: 0.3rem;
+    border-radius: 6px;
+    flex: 1;
+  }
 `;
 
 const MobileActions = styled.div`
@@ -372,12 +609,17 @@ const MobileActions = styled.div`
     gap: 0.5rem;
     z-index: 10;
   }
+
+  @media (max-width: 480px) {
+    bottom: 1.5rem;
+    right: 1rem;
+  }
 `;
 
 const FloatingButton = styled.button`
-  width: 50px;
-  height: 50px;
-  border-radius: 25px;
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -386,6 +628,7 @@ const FloatingButton = styled.button`
   border: none;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
 
   &.edit {
     background-color: rgba(46, 125, 50, 0.9);
@@ -394,6 +637,17 @@ const FloatingButton = styled.button`
   &.delete {
     background-color: rgba(198, 40, 40, 0.9);
   }
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  @media (max-width: 480px) {
+    width: 48px;
+    height: 48px;
+    border-radius: 24px;
+    font-size: 1.3rem;
+  }
 `;
 
 const LoadingContainer = styled.div`
@@ -401,6 +655,11 @@ const LoadingContainer = styled.div`
   justify-content: center;
   align-items: center;
   height: 50vh;
+  min-height: 300px;
+
+  @media (max-width: 480px) {
+    min-height: 200px;
+  }
 `;
 
 const LoadingIndicator = styled.div`
@@ -416,6 +675,12 @@ const LoadingIndicator = styled.div`
       transform: rotate(360deg);
     }
   }
+
+  @media (max-width: 480px) {
+    width: 32px;
+    height: 32px;
+    border-width: 2px;
+  }
 `;
 
 const EmptyState = styled.div`
@@ -423,6 +688,15 @@ const EmptyState = styled.div`
   text-align: center;
   color: rgba(255, 255, 255, 0.7);
   font-style: italic;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+
+  @media (max-width: 768px) {
+    padding: 2rem 1.25rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1.5rem 1rem;
+  }
 `;
 
 // Button components for modals
@@ -433,7 +707,8 @@ const Button = styled.button`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+  min-height: 44px;
 
   &.primary {
     background: linear-gradient(
@@ -455,6 +730,11 @@ const Button = styled.button`
     background: rgba(220, 53, 69, 0.15);
     color: rgba(255, 150, 150, 1);
     border: 1px solid rgba(220, 53, 69, 0.2);
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.8rem 1.25rem;
+    border-radius: 8px;
   }
 `;
 
@@ -596,6 +876,41 @@ const AdminDashboard = () => {
       navigate("/admin/login");
     }
   };
+
+  // Mobile card component for articles
+  const MobileArticleItem = ({ article }) => (
+    <MobileArticleCard onClick={() => setSelectedArticle(article._id)}>
+      <MobileCardHeader>
+        <MobileCardTitle>{article.title}</MobileCardTitle>
+        <Status $published={article.published}>
+          {article.published ? "Published" : "Draft"}
+        </Status>
+      </MobileCardHeader>
+      <MobileCardMeta>
+        <div>{new Date(article.updatedAt).toLocaleDateString()}</div>
+      </MobileCardMeta>
+      <MobileCardActions>
+        <TableActionButton
+          className="edit"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/admin/edit/${article._id}`);
+          }}
+        >
+          Edit
+        </TableActionButton>
+        <TableActionButton
+          className="delete"
+          onClick={(e) => {
+            e.stopPropagation();
+            initiateDelete(article._id, e);
+          }}
+        >
+          Delete
+        </TableActionButton>
+      </MobileCardActions>
+    </MobileArticleCard>
+  );
 
   if (loading) {
     return (
@@ -749,7 +1064,7 @@ const AdminDashboard = () => {
         </AdminTabs>
       </AdminHeader>
 
-      <ArticlesTable>
+      <ArticlesTableContainer>
         <TableHeader>
           <div>Title</div>
           <div>Status</div>
@@ -759,33 +1074,38 @@ const AdminDashboard = () => {
 
         {filteredArticles().length > 0 ? (
           filteredArticles().map((article) => (
-            <TableRow
-              key={article._id}
-              onClick={() => setSelectedArticle(article._id)}
-              style={{ cursor: "pointer" }}
-            >
-              <ArticleTitle>{article.title}</ArticleTitle>
-              <div>
-                <Status $published={article.published}>
-                  {article.published ? "Published" : "Draft"}
-                </Status>
-              </div>
-              <div>{new Date(article.updatedAt).toLocaleDateString()}</div>
-              <div onClick={(e) => e.stopPropagation()}>
-                <TableActionButton
-                  className="edit"
-                  onClick={() => navigate(`/admin/edit/${article._id}`)}
-                >
-                  Edit
-                </TableActionButton>
-                <TableActionButton
-                  className="delete"
-                  onClick={(e) => initiateDelete(article._id, e)}
-                >
-                  Delete
-                </TableActionButton>
-              </div>
-            </TableRow>
+            <div key={article._id}>
+              {/* Desktop/Tablet Table Row */}
+              <TableRow
+                onClick={() => setSelectedArticle(article._id)}
+                style={{ cursor: "pointer" }}
+              >
+                <ArticleTitle>{article.title}</ArticleTitle>
+                <div>
+                  <Status $published={article.published}>
+                    {article.published ? "Published" : "Draft"}
+                  </Status>
+                </div>
+                <div>{new Date(article.updatedAt).toLocaleDateString()}</div>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <TableActionButton
+                    className="edit"
+                    onClick={() => navigate(`/admin/edit/${article._id}`)}
+                  >
+                    Edit
+                  </TableActionButton>
+                  <TableActionButton
+                    className="delete"
+                    onClick={(e) => initiateDelete(article._id, e)}
+                  >
+                    Delete
+                  </TableActionButton>
+                </div>
+              </TableRow>
+
+              {/* Mobile Card Layout */}
+              <MobileArticleItem article={article} />
+            </div>
           ))
         ) : (
           <EmptyState>
@@ -796,7 +1116,7 @@ const AdminDashboard = () => {
               : "No draft articles found."}
           </EmptyState>
         )}
-      </ArticlesTable>
+      </ArticlesTableContainer>
 
       {/* Mobile action buttons */}
       {selectedArticle && (
