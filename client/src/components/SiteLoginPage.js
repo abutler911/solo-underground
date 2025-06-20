@@ -39,6 +39,61 @@ const staticNoise = keyframes`
   100% { background-position: 100px 100px; }
 `;
 
+const flash = keyframes`
+  0% { opacity: 0; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+`;
+
+const typewriter = keyframes`
+  from { width: 0; }
+  to { width: 100%; }
+`;
+
+const intenseFadeOut = keyframes`
+  0% { 
+    opacity: 1; 
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  20% { 
+    opacity: 1; 
+    transform: scale(1.02);
+    filter: brightness(1.2);
+  }
+  40% { 
+    opacity: 1; 
+    transform: scale(1);
+    filter: brightness(1.5);
+  }
+  70% { 
+    opacity: 0.8; 
+    transform: scale(0.98);
+    filter: brightness(1.8) blur(1px);
+  }
+  85% { 
+    opacity: 0.4; 
+    transform: scale(0.95);
+    filter: brightness(2) blur(2px);
+  }
+  100% { 
+    opacity: 0; 
+    transform: scale(0.9);
+    filter: brightness(3) blur(5px);
+  }
+`;
+
+const matrixRain = keyframes`
+  0% { transform: translateY(-100vh); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+`;
+
+const spin = keyframes`
+  to { transform: rotate(360deg); }
+`;
+
 const LoginContainer = styled.div`
   min-height: 100vh;
   min-height: 100dvh;
@@ -200,25 +255,29 @@ const Overlay = styled.div`
   z-index: 999;
   backdrop-filter: blur(5px);
 
-  /* Enhanced matrix-like effect with animation timing */
   &::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text y="20" font-family="monospace" font-size="8" fill="%2300ff4120">SOLO</text><text y="40" font-family="monospace" font-size="8" fill="%2300ff4115">UNDER</text><text y="60" font-family="monospace" font-size="8" fill="%2300ff4110">GROUND</text><text y="80" font-family="monospace" font-size="8" fill="%2300ff4108">ACCESS</text></svg>')
-      repeat;
+    background-image: repeating-linear-gradient(
+      0deg,
+      rgba(0, 255, 65, 0.1) 0px,
+      transparent 2px,
+      transparent 4px,
+      rgba(0, 255, 65, 0.05) 6px
+    );
     animation: ${matrixRain} 4s linear infinite,
       ${staticNoise} 2s linear infinite;
     opacity: 0.4;
   }
 
-  /* Add additional fade out animation when granted */
   ${(props) =>
-    props.$fadeOut &&
-    `
+    props.$fadeOut
+      ? `
     animation: ${intenseFadeOut} 2s ease-out forwards;
     animation-delay: 3s;
-  `}
+  `
+      : ""}
 `;
 
 const OverlayText = styled.h2`
@@ -236,17 +295,16 @@ const OverlayText = styled.h2`
   position: relative;
   z-index: 10;
 
-  /* Add glitch effect for denied status */
   ${(props) =>
-    props.status === "denied" &&
-    `
+    props.status === "denied"
+      ? `
     animation: ${flash} 0.5s ease-in-out, ${glitch} 0.3s ease-in-out infinite;
-  `}
+  `
+      : ""}
 
-  /* Enhanced typewriter effect for granted status with multiple phases */
   ${(props) =>
-    props.status === "granted" &&
-    `
+    props.status === "granted"
+      ? `
     overflow: hidden;
     border-right: 2px solid #00ff41;
     white-space: nowrap;
@@ -255,7 +313,8 @@ const OverlayText = styled.h2`
       ${flicker} 2s infinite 3s,
       ${intenseFadeOut} 2s ease-out 3s forwards;
     max-width: 100%;
-  `}
+  `
+      : ""}
 
   @media (max-width: 480px) {
     font-size: 1rem;
@@ -594,14 +653,8 @@ const FingerprintButton = styled.button`
       rgba(0, 255, 65, 0.4) 290deg,
       transparent 300deg
     );
-    animation: spin 3s linear infinite;
+    animation: ${spin} 3s linear infinite;
     opacity: 0.6;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
   }
 
   &:hover:not(:disabled) {
@@ -642,14 +695,8 @@ const LoadingSpinner = styled.div`
   border: 2px solid rgba(0, 255, 65, 0.3);
   border-radius: 50%;
   border-top-color: #00ff41;
-  animation: spin 1s linear infinite;
+  animation: ${spin} 1s linear infinite;
   box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
 `;
 
 const ErrorMessage = styled.div`
