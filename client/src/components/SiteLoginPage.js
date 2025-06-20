@@ -54,32 +54,26 @@ const intenseFadeOut = keyframes`
   0% { 
     opacity: 1; 
     transform: scale(1);
-    filter: brightness(1);
   }
   20% { 
     opacity: 1; 
     transform: scale(1.02);
-    filter: brightness(1.2);
   }
   40% { 
     opacity: 1; 
     transform: scale(1);
-    filter: brightness(1.5);
   }
   70% { 
     opacity: 0.8; 
     transform: scale(0.98);
-    filter: brightness(1.8) blur(1px);
   }
   85% { 
     opacity: 0.4; 
     transform: scale(0.95);
-    filter: brightness(2) blur(2px);
   }
   100% { 
     opacity: 0; 
     transform: scale(0.9);
-    filter: brightness(3) blur(5px);
   }
 `;
 
@@ -257,8 +251,7 @@ const OverlayText = styled.h2`
     white-space: nowrap;
     animation: 
       ${typewriter} 3s steps(60, end),
-      ${flicker} 2s infinite 3s,
-      ${intenseFadeOut} 2s ease-out 3s forwards;
+      ${flicker} 2s infinite 3s;
     max-width: 100%;
   `
       : ""}
@@ -531,13 +524,7 @@ const ButtonContainer = styled.div`
 `;
 
 const FingerprintButton = styled.button`
-  background: radial-gradient(circle, rgba(0, 40, 0, 0.9), rgba(0, 20, 0, 1)),
-    repeating-conic-gradient(
-      from 0deg,
-      transparent 0deg,
-      rgba(0, 255, 65, 0.1) 10deg,
-      transparent 20deg
-    );
+  background: radial-gradient(circle, rgba(0, 40, 0, 0.9), rgba(0, 20, 0, 1));
   border: 2px solid rgba(0, 255, 65, 0.6);
   border-radius: 50%;
   width: clamp(60px, 15vw, 70px);
@@ -571,11 +558,12 @@ const FingerprintButton = styled.button`
     position: absolute;
     inset: 4px;
     border-radius: 50%;
-    background: conic-gradient(
-      transparent 270deg,
-      rgba(0, 255, 65, 0.8) 280deg,
-      rgba(0, 255, 65, 0.4) 290deg,
-      transparent 300deg
+    background: linear-gradient(
+      45deg,
+      transparent 0%,
+      rgba(0, 255, 65, 0.8) 25%,
+      rgba(0, 255, 65, 0.4) 50%,
+      transparent 75%
     );
     animation: ${spin} 3s linear infinite;
     opacity: 0.6;
